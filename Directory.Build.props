@@ -1,0 +1,95 @@
+<Project>
+
+  <PropertyGroup>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <Authors>Microsoft Health Team</Authors>
+    <Company>Microsoft Corporation</Company>
+    <Copyright>Copyright © Microsoft Corporation. All rights reserved.</Copyright>
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <HighEntropyVA>true</HighEntropyVA>
+    <LangVersion>Latest</LangVersion>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Product>Microsoft Health</Product>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TrimMode>partial</TrimMode>
+    <WarningsAsErrors />
+  </PropertyGroup>
+
+  <!-- Currently the latest version is .NET 8 -->
+  <PropertyGroup>
+    <LatestVersion>net8.0</LatestVersion>
+    <LibraryFrameworks>net8.0;net6.0</LibraryFrameworks>
+  </PropertyGroup>
+
+  <!-- SDK Packages -->
+  <Choose>
+    <When Condition="'$(TargetFramework)' == 'net6.0'">
+      <PropertyGroup>
+        <DependencyInjectionVersion>6.0.1</DependencyInjectionVersion>
+        <MediatRVersion>12.1.1</MediatRVersion>
+        <OTelVersion>1.6.0</OTelVersion>
+        <SdkPackageVersion>6.0.0</SdkPackageVersion>
+        <WebUtilitiesVersion>2.2.0</WebUtilitiesVersion>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetFramework)' == 'netstandard2.0'">
+      <PropertyGroup>
+        <DependencyInjectionVersion>8.0.0</DependencyInjectionVersion>
+        <MediatRVersion>12.2.0</MediatRVersion>
+        <OTelVersion>1.7.0</OTelVersion>
+        <SdkPackageVersion>8.0.0</SdkPackageVersion>
+        <WebUtilitiesVersion>2.2.0</WebUtilitiesVersion>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <DependencyInjectionVersion>8.0.0</DependencyInjectionVersion>
+        <MediatRVersion>12.2.0</MediatRVersion>
+        <OTelVersion>1.7.0</OTelVersion>
+        <SdkPackageVersion>8.0.0</SdkPackageVersion>
+        <WebUtilitiesVersion>8.0.0</WebUtilitiesVersion>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <!--
+    The fo-dicom.Codecs package relies on native assemblies for
+    Linux x64, OSX, and Windows x64. Given that the core dicom
+    project takes a dependency on these codecs, every project
+    should also be compiled for x64, as other platforms like x86
+    would not be able to load these native assemblies.
+  -->
+  <PropertyGroup>
+    <Platforms>x64</Platforms>
+  </PropertyGroup>
+
+  <!-- Include the following source files for .NET Standard 2.0 projects -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)\lang\*" Visible="false" />
+  </ItemGroup>
+
+  <Choose>
+    <When Condition="$(MSBuildProjectName.Contains('Test'))">
+      <PropertyGroup>
+        <IsPackable>false</IsPackable>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <AnalysisLevel>latest-All</AnalysisLevel>
+        <IsPackable>true</IsPackable>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
