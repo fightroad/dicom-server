@@ -1,52 +1,50 @@
-# Extended Query Tags
+# 扩展查询标签
 
-## Overview
+## 概述
 
-By default, the Medical Imaging Server for DICOM supports querying on the DICOM tags specified in the [conformance statement](https://github.com/microsoft/dicom-server/blob/main/docs/resources/conformance-statement.md#searchable-attributes). However, this list of tags may be expanded by enabling _extended query tags_. Using the APIs listed below, users can additionally index their DICOM studies, series, and instances on both standard and private DICOM tags such that they can be specified in QIDO-RS.
+默认情况下，Medical Imaging Server for DICOM 支持查询[符合性声明](https://github.com/microsoft/dicom-server/blob/main/docs/resources/conformance-statement.md#searchable-attributes)中指定的 DICOM 标签。但是，可以通过启用*扩展查询标签*来扩展此标签列表。使用下面列出的 API，用户可以额外索引其 DICOM 研究、序列和实例的标准和私有 DICOM 标签，以便可以在 QIDO-RS 中指定它们。
 
+## API
 
+### 版本：v1-prerelease, v1
 
-## APIs
+为了帮助管理给定 DICOM 服务器实例中支持的标签，已添加以下 API 端点。
 
-### Version: v1-prerelease, v1
-
-To help manage the supported tags in a given DICOM server instance, the following API endpoints have been added.
-
-| API                                               | Description                                                  |
+| API                                               | 描述                                                  |
 | ------------------------------------------------- | ------------------------------------------------------------ |
-| POST       .../extendedquerytags                  | [Add Extended Query Tags](#add-extended-query-tags)          |
-| GET         .../extendedquerytags                 | [List Extended Query Tags](#list-extended-query-tags)        |
-| GET         .../extendedquerytags/{tagPath}       | [Get Extended Query Tag](#get-extended-query-tag)            |
-| DELETE  .../extendedquerytags/{tagPath}           | [Delete Extended Query Tag](#delete-extended-query-tag)      |
-| PATCH   .../extendedquerytags/{tagPath}           | [Update Extended Query Tag](#update-extended-query-tag)      |
-| GET        .../extendedquerytags/{tagPath}/errors | [List Extended Query Tag Errors](#list-extended-query-tag-errors) |
-| GET        .../operations/{operationId}           | [Get Operation](#get-operation)                              |
+| POST       .../extendedquerytags                  | [添加扩展查询标签](#添加扩展查询标签)          |
+| GET         .../extendedquerytags                 | [列出扩展查询标签](#列出扩展查询标签)        |
+| GET         .../extendedquerytags/{tagPath}       | [获取扩展查询标签](#获取扩展查询标签)            |
+| DELETE  .../extendedquerytags/{tagPath}           | [删除扩展查询标签](#删除扩展查询标签)      |
+| PATCH   .../extendedquerytags/{tagPath}           | [更新扩展查询标签](#更新扩展查询标签)      |
+| GET        .../extendedquerytags/{tagPath}/errors | [列出扩展查询标签错误](#列出扩展查询标签错误) |
+| GET        .../operations/{operationId}           | [获取操作](#获取操作)                              |
 
-### Add Extended Query Tags
+### 添加扩展查询标签
 
-Add one or more extended query tags and starts a long-running operation that re-indexes current DICOM instances on the specified tag(s).
+添加一个或多个扩展查询标签，并启动长时间运行的操作，以在指定标签上重新索引当前 DICOM 实例。
 
 ```http
 POST .../extendedquerytags
 ```
 
-#### Request Header
+#### 请求头
 
-| Name         | Required | Type   | Description                     |
+| 名称         | 必需 | 类型   | 描述                     |
 | ------------ | -------- | ------ | ------------------------------- |
-| Content-Type | True     | string | `application/json` is supported |
+| Content-Type | True     | string | 支持 `application/json` |
 
-#### Request Body
+#### 请求体
 
-| Name | Required | Type                                                         | Description |
+| 名称 | 必需 | 类型                                                         | 描述 |
 | ---- | -------- | ------------------------------------------------------------ | ----------- |
-| body |          | [Extended Query Tag for Adding](#extended-query-tag-for-adding)`[]` |             |
+| body |          | [用于添加的扩展查询标签](#用于添加的扩展查询标签)`[]` |             |
 
-#### Limitations
+#### 限制
 
-The following VR types are supported:
+支持以下 VR 类型：
 
-| VR   | Description           | Single Value Matching | Range Matching | Fuzzy Matching |
+| VR   | 描述           | 单值匹配 | 范围匹配 | 模糊匹配 |
 | ---- | --------------------- | --------------------- | -------------- | -------------- |
 | AE   | Application Entity    | X                     |                |                |
 | AS   | Age String            | X                     |                |                |
@@ -67,206 +65,206 @@ The following VR types are supported:
 | UL   | Unsigned Long         | X                     |                |                |
 | US   | Unsigned Short        | X                     |                |                |
 
-> Sequential tags i.e. tags under a tag of type Sequence of Items (SQ) are currently not supported.
+> 目前不支持序列标签，即序列项类型 (SQ) 标签下的标签。
 
-> You can add up to 128 extended query tags.
+> 最多可以添加 128 个扩展查询标签。
 
-> Only the first value will be indexed of a single valued data element that incorrectly has multiple values.
+> 对于错误地具有多个值的单值数据元素，仅索引第一个值。
 
-> We do not index extended query tags if the value is null or empty.
+> 如果值为 null 或空，我们不会索引扩展查询标签。
 
-#### Responses
+#### 响应
 
-| Name              | Type                                        | Description                                                  |
+| 名称              | 类型                                        | 描述                                                  |
 | ----------------- | ------------------------------------------- | ------------------------------------------------------------ |
-| 202 (Accepted)    | [Operation Reference](#operation-reference) | Extended query tag(s) have been added, and a long-running operation has been started to re-index existing DICOM instances |
-| 400 (Bad Request) |                                             | Request body has invalid data                                |
-| 409 (Conflict)    |                                             | One or more requested query tags already are supported       |
+| 202 (Accepted)    | [操作引用](#操作引用) | 已添加扩展查询标签，并已启动长时间运行的操作以重新索引现有 DICOM 实例 |
+| 400 (Bad Request) |                                             | 请求体包含无效数据                                |
+| 409 (Conflict)    |                                             | 一个或多个请求的查询标签已受支持       |
 
-### List Extended Query Tags
+### 列出扩展查询标签
 
-Lists of all extended query tag(s).
+列出所有扩展查询标签。
 
 ```http
 GET .../extendedquerytags
 ```
 
-#### Responses
+#### 响应
 
-| Name     | Type                                          | Description                 |
+| 名称     | 类型                                          | 描述                 |
 | -------- | --------------------------------------------- | --------------------------- |
-| 200 (OK) | [Extended Query Tag](#extended-query-tag)`[]` | Returns extended query tags |
+| 200 (OK) | [扩展查询标签](#扩展查询标签)`[]` | 返回扩展查询标签 |
 
-### Get Extended Query Tag
+### 获取扩展查询标签
 
-Get an extended query tag.
+获取扩展查询标签。
 
 ```http
 GET .../extendedquerytags/{tagPath}
 ```
 
-#### URI Parameters
+#### URI 参数
 
-| Name    | In   | Required | Type   | Description                                                  |
+| 名称    | 位置   | 必需 | 类型   | 描述                                                  |
 | ------- | ---- | -------- | ------ | ------------------------------------------------------------ |
-| tagPath | path | True     | string | tagPath is the path for the tag, which can be either tag or keyword. E.g. Patient Id is represented by `00100020` or `PatientId` |
+| tagPath | path | True     | string | tagPath 是标签的路径，可以是标签或关键字。例如，Patient Id 由 `00100020` 或 `PatientId` 表示 |
 
-####  Responses
+####  响应
 
-| Name              | Type                                      | Description                                            |
+| 名称              | 类型                                      | 描述                                            |
 | ----------------- | ----------------------------------------- | ------------------------------------------------------ |
-| 200 (OK)          | [Extended Query Tag](#extended-query-tag) | The extended query tag with the specified `tagPath`    |
-| 400 (Bad Request) |                                           | Requested tag path is invalid                          |
-| 404 (Not Found)   |                                           | Extended query tag with requested tagPath is not found |
+| 200 (OK)          | [扩展查询标签](#扩展查询标签) | 具有指定 `tagPath` 的扩展查询标签    |
+| 400 (Bad Request) |                                           | 请求的标签路径无效                          |
+| 404 (Not Found)   |                                           | 未找到具有请求 tagPath 的扩展查询标签 |
 
-### Delete Extended Query Tag
+### 删除扩展查询标签
 
-Delete an extended query tag.
+删除扩展查询标签。
 
 ```http
 DELETE .../extendedquerytags/{tagPath}
 ```
 
-#### URI Parameters
+#### URI 参数
 
-| Name    | In   | Required | Type   | Description                                                  |
+| 名称    | 位置   | 必需 | 类型   | 描述                                                  |
 | ------- | ---- | -------- | ------ | ------------------------------------------------------------ |
-| tagPath | path | True     | string | tagPath is the path for the tag, which can be either tag or keyword. E.g. Patient Id is represented by `00100020` or `PatientId` |
+| tagPath | path | True     | string | tagPath 是标签的路径，可以是标签或关键字。例如，Patient Id 由 `00100020` 或 `PatientId` 表示 |
 
-#### Responses
+#### 响应
 
-| Name              | Type | Description                                                  |
+| 名称              | 类型 | 描述                                                  |
 | ----------------- | ---- | ------------------------------------------------------------ |
-| 204 (No Content)  |      | Extended query tag with requested tagPath has been successfully deleted. |
-| 400 (Bad Request) |      | Requested tag path is invalid.                               |
-| 404 (Not Found)   |      | Extended query tag with requested tagPath is not found       |
+| 204 (No Content)  |      | 已成功删除具有请求 tagPath 的扩展查询标签。 |
+| 400 (Bad Request) |      | 请求的标签路径无效。                               |
+| 404 (Not Found)   |      | 未找到具有请求 tagPath 的扩展查询标签       |
 
-### Update Extended Query Tag
+### 更新扩展查询标签
 
-Update an extended query tag.
+更新扩展查询标签。
 
 ```http
 PATCH .../extendedquerytags/{tagPath}
 ```
 
-#### URI Parameters
+#### URI 参数
 
-| Name    | In   | Required | Type   | Description                                                  |
+| 名称    | 位置   | 必需 | 类型   | 描述                                                  |
 | ------- | ---- | -------- | ------ | ------------------------------------------------------------ |
-| tagPath | path | True     | string | tagPath is the path for the tag, which can be either tag or keyword. E.g. Patient Id is represented by `00100020` or `PatientId` |
+| tagPath | path | True     | string | tagPath 是标签的路径，可以是标签或关键字。例如，Patient Id 由 `00100020` 或 `PatientId` 表示 |
 
-#### Request Header
+#### 请求头
 
-| Name         | Required | Type   | Description                      |
+| 名称         | 必需 | 类型   | 描述                      |
 | ------------ | -------- | ------ | -------------------------------- |
-| Content-Type | True     | string | `application/json` is supported. |
+| Content-Type | True     | string | 支持 `application/json`。 |
 
-#### Request Body
+#### 请求体
 
-| Name | Required | Type                                                         | Description |
+| 名称 | 必需 | 类型                                                         | 描述 |
 | ---- | -------- | ------------------------------------------------------------ | ----------- |
-| body |          | [Extended Query Tag for Updating](#extended-query-tag-for-updating) |             |
+| body |          | [用于更新的扩展查询标签](#用于更新的扩展查询标签) |             |
 
-#### Responses
+#### 响应
 
-| Name              | Type                                      | Description                                            |
+| 名称              | 类型                                      | 描述                                            |
 | ----------------- | ----------------------------------------- | ------------------------------------------------------ |
-| 20 (OK)           | [Extended Query Tag](#extended-query-tag) | The updated extended query tag                         |
-| 400 (Bad Request) |                                           | Requested tag path or body is invalid                  |
-| 404 (Not Found)   |                                           | Extended query tag with requested tagPath is not found |
+| 200 (OK)           | [扩展查询标签](#扩展查询标签) | 更新的扩展查询标签                         |
+| 400 (Bad Request) |                                           | 请求的标签路径或正文无效                  |
+| 404 (Not Found)   |                                           | 未找到具有请求 tagPath 的扩展查询标签 |
 
-### List Extended Query Tag Errors
+### 列出扩展查询标签错误
 
-Lists errors on an extended query tag.
+列出扩展查询标签的错误。
 
 ```http
 GET .../extendedquerytags/{tagPath}/errors
 ```
 
-#### URI Parameters
+#### URI 参数
 
-| Name    | In   | Required | Type   | Description                                                  |
+| 名称    | 位置   | 必需 | 类型   | 描述                                                  |
 | ------- | ---- | -------- | ------ | ------------------------------------------------------------ |
-| tagPath | path | True     | string | tagPath is the path for the tag, which can be either tag or keyword. E.g. Patient Id is represented by `00100020` or `PatientId` |
+| tagPath | path | True     | string | tagPath 是标签的路径，可以是标签或关键字。例如，Patient Id 由 `00100020` 或 `PatientId` 表示 |
 
-####  Responses
+####  响应
 
-| Name              | Type                                                       | Description                                               |
+| 名称              | 类型                                                       | 描述                                               |
 | ----------------- | ---------------------------------------------------------- | --------------------------------------------------------- |
-| 200 (OK)          | [Extended Query Tag Error](#extended-query-tag-error) `[]` | List of extended query tag errors associated with the tag |
-| 400 (Bad Request) |                                                            | Requested tag path is invalid                             |
-| 404 (Not Found)   |                                                            | Extended query tag with requested tagPath is not found    |
+| 200 (OK)          | [扩展查询标签错误](#扩展查询标签错误) `[]` | 与标签关联的扩展查询标签错误列表 |
+| 400 (Bad Request) |                                                            | 请求的标签路径无效                             |
+| 404 (Not Found)   |                                                            | 未找到具有请求 tagPath 的扩展查询标签    |
 
-### Get Operation
+### 获取操作
 
-Get a long-running operation.
+获取长时间运行的操作。
 
 ```http
 GET .../operations/{operationId}
 ```
 
-#### URI Parameters
+#### URI 参数
 
-| Name        | In   | Required | Type   | Description      |
+| 名称        | 位置   | 必需 | 类型   | 描述      |
 | ----------- | ---- | -------- | ------ | ---------------- |
-| operationId | path | True     | string | The operation id |
+| operationId | path | True     | string | 操作 ID |
 
-#### Responses
+#### 响应
 
-| Name            | Type                    | Description                                  |
+| 名称            | 类型                    | 描述                                  |
 | --------------- | ----------------------- | -------------------------------------------- |
-| 200 (OK)        | [Operation](#operation) | The completed operation for the specified ID |
-| 202 (Accepted)  | [Operation](#operation) | The running operation for the specified ID   |
-| 404 (Not Found) |                         | The operation is not found                   |
+| 200 (OK)        | [操作](#操作) | 指定 ID 的已完成操作 |
+| 202 (Accepted)  | [操作](#操作) | 指定 ID 的运行中操作   |
+| 404 (Not Found) |                         | 未找到操作                   |
 
-## QIDO with Extended Query Tags
+## 使用扩展查询标签的 QIDO
 
-### Tag Status
+### 标签状态
 
-The [Status](#extended-query-tag-status) of Extended query tag indicates current status. When an extended query tag is first added, its status is set to `Adding`, and a long-running operation is kicked off to reindex existing DICOM instances. After the operation is completed, the tag status is updated to `Ready`. The extended query tag can now be used in [QIDO](../resources/conformance-statement.md#search-qido-rs).
+扩展查询标签的[状态](#扩展查询标签状态)指示当前状态。首次添加扩展查询标签时，其状态设置为 `Adding`，并启动长时间运行的操作以重新索引现有 DICOM 实例。操作完成后，标签状态更新为 `Ready`。扩展查询标签现在可以在 [QIDO](../resources/conformance-statement.md#search-qido-rs) 中使用。
 
-For example, if the tag Manufacturer Model Name (0008,1090) is added, and in `Ready` status, hereafter the following queries can be used to filter stored instances by Manufacturer Model Name:
+例如，如果添加标签 Manufacturer Model Name (0008,1090) 并处于 `Ready` 状态，此后可以使用以下查询按 Manufacturer Model Name 过滤存储的实例：
 
 ```http
 ../instances?ManufacturerModelName=Microsoft
 ```
 
-They can also be used in conjunction with existing tags. E.g:
+它们也可以与现有标签结合使用。例如：
 
 ```http
 ../instances?00081090=Microsoft&PatientName=Jo&fuzzyMatching=true
 ```
 
-> After extended query tag is added, any DICOM instance stored is indexed on it
+> 添加扩展查询标签后，存储的任何 DICOM 实例都会在其上建立索引
 
-### Tag Query Status
+### 标签查询状态
 
-[QueryStatus](#extended-query-tag-status) indicates whether QIDO is allowed for the tag. When a reindex operation fails to process one or more DICOM instances for a tag, that tag's QueryStatus is set to `Disabled` automatically. You can choose to ignore indexing errors and allow queries to use this tag by setting the `QueryStatus` to `Enabled` via  [Update Extended Query Tag](#update-extended-query-tag) API. Any QIDO requests that reference at least one manually enabled tag will include the set of tags with indexing errors in the response header `erroneous-dicom-attributes`.
+[QueryStatus](#扩展查询标签状态) 指示是否允许对该标签进行 QIDO。当重新索引操作无法处理标签的一个或多个 DICOM 实例时，该标签的 QueryStatus 会自动设置为 `Disabled`。您可以选择忽略索引错误，并通过 [更新扩展查询标签](#更新扩展查询标签) API 将 `QueryStatus` 设置为 `Enabled` 来允许查询使用此标签。任何引用至少一个手动启用的标签的 QIDO 请求都将在响应头 `erroneous-dicom-attributes` 中包含具有索引错误的标签集。
 
-For example, suppose the extended query tag `PatientAge` had errors during reindexing, but was enabled manually. For the query below, you would be able to see `PatientAge` in the `erroneous-dicom-attributes` header.
+例如，假设扩展查询标签 `PatientAge` 在重新索引期间出现错误，但已手动启用。对于下面的查询，您将能够在 `erroneous-dicom-attributes` 标头中看到 `PatientAge`。
 
 ```http
 ../instances?PatientAge=035Y
 ```
 
-## Definitions
+## 定义
 
-### Extended Query Tag
+### 扩展查询标签
 
-A non-standard DICOM tag that will be supported for QIDO-RS.
+将支持 QIDO-RS 的非标准 DICOM 标签。
 
-| Name           | Type                                                         | Description                                                  |
+| 名称           | 类型                                                         | 描述                                                  |
 | -------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Path           | string                                                       | Path of tag, normally composed of group id and element id. E.g. `PatientId` (0010,0020) has path 00100020 |
-| VR             | string                                                       | Value representation of this tag                             |
-| PrivateCreator | string                                                       | Identification code of the implementer of this private tag   |
-| Level          | [Extended Query Tag Level](#extended-query-tag-level)        | Level of extended query tag                                  |
-| Status         | [Extended Query Tag Status](#extended-query-tag-status)      | Status of the extended query tag                             |
-| QueryStatus    | [Extended Query Tag Query Status](#extended-query-tag-query-status) | Query status of extended query tag                           |
-| Errors         | [Extended Query Tag Errors Reference](#extended-query-tag-errors-reference) | Reference to extended query tag errors                       |
-| Operation      | [Operation Reference](#operation-reference)                  | Reference to a long-running operation                        |
+| Path           | string                                                       | 标签路径，通常由组 ID 和元素 ID 组成。例如，`PatientId` (0010,0020) 的路径为 00100020 |
+| VR             | string                                                       | 此标签的值表示                             |
+| PrivateCreator | string                                                       | 此私有标签的实现者的标识代码   |
+| Level          | [扩展查询标签级别](#扩展查询标签级别)        | 扩展查询标签的级别                                  |
+| Status         | [扩展查询标签状态](#扩展查询标签状态)      | 扩展查询标签的状态                             |
+| QueryStatus    | [扩展查询标签查询状态](#扩展查询标签查询状态) | 扩展查询标签的查询状态                           |
+| Errors         | [扩展查询标签错误引用](#扩展查询标签错误引用) | 对扩展查询标签错误的引用                       |
+| Operation      | [操作引用](#操作引用)                  | 对长时间运行操作的引用                        |
 
-**Example1:** a standard tag (0008,0070) in `Ready` status.
+**示例1：** 处于 `Ready` 状态的标准标签 (0008,0070)。
 
 ```json
 {
@@ -278,7 +276,7 @@ A non-standard DICOM tag that will be supported for QIDO-RS.
 }
 ```
 
-**Example2:**  a standard tag (0010,1010) in `Adding` status.  An operation with id `1a5d0306d9624f699929ee1a59ed57a0` is running on it, and 21 errors has occurred so far.
+**示例2：** 处于 `Adding` 状态的标准标签 (0010,1010)。一个 ID 为 `1a5d0306d9624f699929ee1a59ed57a0` 的操作正在其上运行，到目前为止已发生 21 个错误。
 
 ```json
 {
@@ -298,30 +296,30 @@ A non-standard DICOM tag that will be supported for QIDO-RS.
 }
 ```
 
-### Operation Reference
+### 操作引用
 
-Reference to a long-running operation.
+对长时间运行操作的引用。
 
-| Name | Type   | Description          |
+| 名称 | 类型   | 描述          |
 | ---- | ------ | -------------------- |
-| Id   | string | operation id         |
-| Href | string | Uri to the operation |
+| Id   | string | 操作 ID         |
+| Href | string | 操作的 Uri |
 
-### Operation
+### 操作
 
-Represents a long-running operation.
+表示长时间运行的操作。
 
-| Name            | Type                                  | Description                                                  |
+| 名称            | 类型                                  | 描述                                                  |
 | --------------- | ------------------------------------- | ------------------------------------------------------------ |
-| OperationId     | string                                | The operation Id                                             |
-| OperationType   | [Operation Type](#operation-type)     | Type of  the long running operation                          |
-| CreatedTime     | string                                | Time when the operation was created                          |
-| LastUpdatedTime | string                                | Time when the operation was updated last time                |
-| Status          | [Operation Status](#operation-status) | Represents run time status of operation                      |
-| PercentComplete | Integer                               | Percentage of work that has been completed by the operation  |
-| Resources       | string`[]`                            | Collection of resources locations that the operation is creating or manipulating |
+| OperationId     | string                                | 操作 ID                                             |
+| OperationType   | [操作类型](#操作类型)     | 长时间运行操作的类型                          |
+| CreatedTime     | string                                | 创建操作的时间                          |
+| LastUpdatedTime | string                                | 上次更新操作的时间                |
+| Status          | [操作状态](#操作状态) | 表示操作的运行时状态                      |
+| PercentComplete | Integer                               | 操作已完成的工作百分比  |
+| Resources       | string`[]`                            | 操作正在创建或操作的资源位置的集合 |
 
-**Example:** a running reindex operation.
+**示例：** 正在运行的重新索引操作。
 
 ```json
 {
@@ -337,32 +335,30 @@ Represents a long-running operation.
 }
 ```
 
+### 操作状态
 
+表示长时间运行操作的运行时状态。
 
-### Operation Status
-
-Represents run time status of long running operation.
-
-| Name       | Type   | Description                                                  |
+| 名称       | 类型   | 描述                                                  |
 | ---------- | ------ | ------------------------------------------------------------ |
-| NotStarted | string | The operation is not started                                 |
-| Running    | string | The operation is executing and has not yet finished          |
-| Completed  | string | The operation has finished successfully                      |
-| Failed     | string | The operation has stopped prematurely after encountering one or more errors |
+| NotStarted | string | 操作未启动                                 |
+| Running    | string | 操作正在执行但尚未完成          |
+| Completed  | string | 操作已成功完成                      |
+| Failed     | string | 操作在遇到一个或多个错误后过早停止 |
 
-### Extended Query Tag Error
+### 扩展查询标签错误
 
-An error that occurred during an extended query tag indexing operation.
+在扩展查询标签索引操作期间发生的错误。
 
-| Name              | Type   | Description                                       |
+| 名称              | 类型   | 描述                                       |
 | ----------------- | ------ | ------------------------------------------------- |
-| StudyInstanceUid  | string | Study instance UID where indexing errors occured  |
-| SeriesInstanceUid | string | Series instance UID where indexing errors occured |
-| SopInstanceUid    | string | Sop instance UID where indexing errors occured    |
-| CreatedTime       | string | Time when error occured(UTC)                      |
-| ErrorMessage      | string | Error message                                     |
+| StudyInstanceUid  | string | 发生索引错误的研究实例 UID  |
+| SeriesInstanceUid | string | 发生索引错误的序列实例 UID |
+| SopInstanceUid    | string | 发生索引错误的 Sop 实例 UID    |
+| CreatedTime       | string | 发生错误的时间(UTC)                      |
+| ErrorMessage      | string | 错误消息                                     |
 
-**Example**:  an unexpected value length error on an DICOM instance. It occurred at 2021-10-06T16:41:44.4783136.
+**示例**：DICOM 实例上的意外值长度错误。它发生在 2021-10-06T16:41:44.4783136。
 
 ```json
 {
@@ -374,74 +370,74 @@ An error that occurred during an extended query tag indexing operation.
 }
 ```
 
-### Extended Query Tag Errors Reference
+### 扩展查询标签错误引用
 
-Reference to extended query tag errors.
+对扩展查询标签错误的引用。
 
-| Name  | Type    | Description                                      |
+| 名称  | 类型    | 描述                                      |
 | ----- | ------- | ------------------------------------------------ |
-| Count | Integer | Total number of errors on the extended query tag |
-| Href  | string  | Uri to extended query tag errors                 |
+| Count | Integer | 扩展查询标签上的错误总数 |
+| Href  | string  | 扩展查询标签错误的 Uri                 |
 
-### Operation Type
+### 操作类型
 
-The type of  a long-running operation.
+长时间运行操作的类型。
 
-| Name    | Type   | Description                                                  |
+| 名称    | 类型   | 描述                                                  |
 | ------- | ------ | ------------------------------------------------------------ |
-| Reindex | string | A reindex operation that updates the indices for previously added data based on new tags |
+| Reindex | string | 根据新标签更新先前添加数据的索引的重新索引操作 |
 
-### Extended Query Tag Status
+### 扩展查询标签状态
 
-The status of  extended query tag.
+扩展查询标签的状态。
 
-| Name     | Type   | Description                                                  |
+| 名称     | 类型   | 描述                                                  |
 | -------- | ------ | ------------------------------------------------------------ |
-| Adding   | string | The extended query tag has been added, and a long-running operation is reindexing existing DICOM instances |
-| Ready    | string | The extended query tag  is ready for QIDO-RS                 |
-| Deleting | string | The extended query tag  is being deleted                     |
+| Adding   | string | 已添加扩展查询标签，并且长时间运行的操作正在重新索引现有 DICOM 实例 |
+| Ready    | string | 扩展查询标签已准备好用于 QIDO-RS                 |
+| Deleting | string | 正在删除扩展查询标签                     |
 
-### Extended Query Tag Level
+### 扩展查询标签级别
 
-The level of the DICOM information hierarchy where this tag applies.
+此标签适用的 DICOM 信息层次结构的级别。
 
-| Name     | Type   | Description                                              |
+| 名称     | 类型   | 描述                                              |
 | -------- | ------ | -------------------------------------------------------- |
-| Instance | string | The extended query tag is relevant at the instance level |
-| Series   | string | The extended query tag is relevant at the series level   |
-| Study    | string | The extended query tag is relevant at the study level    |
+| Instance | string | 扩展查询标签在实例级别相关 |
+| Series   | string | 扩展查询标签在序列级别相关   |
+| Study    | string | 扩展查询标签在研究级别相关    |
 
-### Extended Query Tag Query Status
+### 扩展查询标签查询状态
 
-The query status of extended query tag.
+扩展查询标签的查询状态。
 
-| Name     | Type   | Description                                         |
+| 名称     | 类型   | 描述                                         |
 | -------- | ------ | --------------------------------------------------- |
-| Disabled | string | The extended query tag is not allowed to be queried |
-| Enabled  | string | The extended query tag is allowed to be queried     |
+| Disabled | string | 不允许查询扩展查询标签 |
+| Enabled  | string | 允许查询扩展查询标签     |
 
-> Note:  Errors during reindex operation disables QIDO on the extended query tag. You can call [Update Extended Query Tag](#update-extended-query-tag) API to enable it.
+> 注意：重新索引操作期间的错误会禁用扩展查询标签上的 QIDO。您可以调用 [更新扩展查询标签](#更新扩展查询标签) API 来启用它。
 
-### Extended Query Tag for Updating
+### 用于更新的扩展查询标签
 
-Represents extended query tag for updating.
+表示用于更新的扩展查询标签。
 
-| Name        | Type                                                         | Description                            |
+| 名称        | 类型                                                         | 描述                            |
 | ----------- | ------------------------------------------------------------ | -------------------------------------- |
-| QueryStatus | [Extended Query Tag Query Status](#extended-query-tag-query-status) | The query status of extended query tag |
+| QueryStatus | [扩展查询标签查询状态](#扩展查询标签查询状态) | 扩展查询标签的查询状态 |
 
-### Extended Query Tag for Adding
+### 用于添加的扩展查询标签
 
-Represents extended query tag for adding.
+表示用于添加的扩展查询标签。
 
-| Name           | Required | Type                                                  | Description                                                  |
+| 名称           | 必需 | 类型                                                  | 描述                                                  |
 | -------------- | -------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| Path           | True     | string                                                | Path of tag, normally composed of group id and element id. E.g. `PatientId` (0010,0020) has path 00100020 |
-| VR             |          | string                                                | Value representation of this tag.  It's optional for standard tag, and required for private tag |
-| PrivateCreator |          | string                                                | Identification code of the implementer of this private tag. Only set when the tag is a private tag |
-| Level          | True     | [Extended Query Tag Level](#extended-query-tag-level) | Represents the hierarchy at which this tag is relevant. Should be one of Study, Series or Instance |
+| Path           | True     | string                                                | 标签路径，通常由组 ID 和元素 ID 组成。例如，`PatientId` (0010,0020) 的路径为 00100020 |
+| VR             |          | string                                                | 此标签的值表示。对于标准标签是可选的，对于私有标签是必需的 |
+| PrivateCreator |          | string                                                | 此私有标签的实现者的标识代码。仅在标签是私有标签时设置 |
+| Level          | True     | [扩展查询标签级别](#扩展查询标签级别) | 表示此标签相关的层次结构。应该是 Study、Series 或 Instance 之一 |
 
-**Example1:**  `MicrosoftPC` is defining the private tag (0401,1001) with the `SS` value representation on Instance level
+**示例1：** `MicrosoftPC` 在实例级别定义具有 `SS` 值表示的私有标签 (0401,1001)
 
 ```json
 {
@@ -452,7 +448,7 @@ Represents extended query tag for adding.
 }
 ```
 
-**Example2:** the standard tag with keyword `ManufacturerModelName` with the `LO` value representation is defined on Series level
+**示例2：** 在序列级别定义具有 `LO` 值表示的关键字为 `ManufacturerModelName` 的标准标签
 
 ```json
 {
@@ -462,7 +458,7 @@ Represents extended query tag for adding.
 }
 ```
 
- **Example3:** the standard tag (0010,0040) is defined on studies: the value representation is already defined by the DICOM standard
+ **示例3：** 在研究级别定义标准标签 (0010,0040)：值表示已由 DICOM 标准定义
 
 ```json
 {

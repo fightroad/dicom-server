@@ -1,3 +1,5 @@
+> DICOM Cast 部署 ARM 模板（保持 JSON 原样，按需修改参数后部署）  
+
 ```json
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",

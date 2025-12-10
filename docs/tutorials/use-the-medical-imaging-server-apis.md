@@ -1,52 +1,52 @@
-# Use DICOMweb&trade; Standard APIs with Medical Imaging Server for DICOM
+# 使用 Medical Imaging Server for DICOM 的 DICOMweb&trade; 标准 API
 
-This tutorial gives on overview of how to use the DICOMweb&trade; Standard APIs with the Medical Imaging Server for DICOM.
+本教程概述了如何将 DICOMweb&trade; 标准 API 与 Medical Imaging Server for DICOM 一起使用。
 
-The Medical Imaging Server for DICOM supports a subset of the DICOMweb&trade; Standard. Support includes:
+Medical Imaging Server for DICOM 支持 DICOMweb&trade; 标准的子集。支持包括：
 
 - Store (STOW-RS)
 - Retrieve (WADO-RS)
 - Search (QIDO-RS)
 
-Additionally, the following non-standard API(s) are supported:
+此外，支持以下非标准 API：
 
 - Delete
 - Change Feed
 
-You can learn more about our support of the various DICOM Web Standard APIs in our [Conformance Statement](../resources/conformance-statement.md).
+您可以在我们的[符合性声明](../resources/conformance-statement.md)中了解更多关于我们对各种 DICOM Web 标准 API 的支持。
 
-## Prerequisites
+## 先决条件
 
-In order to use the DICOMweb&trade; Standard APIs, you must have an instance of the Medical Imaging Server for DICOM deployed. If you have not already deployed the Medical Imaging Server, [Deploy the Medical Imaging Server to Azure](../quickstarts/deploy-via-azure.md).
+为了使用 DICOMweb&trade; 标准 API，您必须部署 Medical Imaging Server for DICOM 的实例。如果您尚未部署 Medical Imaging Server，请[将 Medical Imaging Server 部署到 Azure](../quickstarts/deploy-via-azure.md)。
 
-Once deployment is complete, you can use the Azure Portal to navigate to the newly created App Service to see the details and the service url. Make sure to specify the version as part of the url when making requests. More information can be found in the [Api Versioning Documentation](../api-versioning.md)
+部署完成后，您可以使用 Azure 门户导航到新创建的 App Service 以查看详细信息和服务 URL。发出请求时，请确保在 URL 中指定版本。更多信息可以在 [API 版本控制文档](../api-versioning.md) 中找到
 
-## Overview of various methods to use with Medical Imaging Server for DICOM
+## 与 Medical Imaging Server for DICOM 一起使用的各种方法概述
 
-Because the Medical Imaging Server for DICOM is exposed as a REST API, you can access it using any modern development language. For language-agnostic information on working with the service, please refer to our [Conformance Statement](../resources/conformance-statement.md).
+因为 Medical Imaging Server for DICOM 作为 REST API 公开，您可以使用任何现代开发语言访问它。有关使用服务的语言无关信息，请参考我们的[符合性声明](../resources/conformance-statement.md)。
 
-To see language-specific examples, please see the examples below. Alternatively, if you open the Postman Collection, you can see examples in several languages including Go, Java, Javascript, C#, PHP, C, NodeJS, Objective-C, OCaml, PowerShell, Python, Ruby, and Swift.
+要查看特定语言的示例，请参阅下面的示例。或者，如果您打开 Postman 集合，您可以看到包括 Go、Java、Javascript、C#、PHP、C、NodeJS、Objective-C、OCaml、PowerShell、Python、Ruby 和 Swift 在内的多种语言的示例。
 
 ### C#
 
-The C# examples use the library included in this repo to simplify access to the API. Refer to the [C# examples](../tutorials/use-dicom-web-standard-apis-with-c%23.md) to learn how to use C# with the Medical Imaging Server for DICOM.
+C# 示例使用此存储库中包含的库来简化对 API 的访问。参考 [C# 示例](../tutorials/use-dicom-web-standard-apis-with-c%23.md) 了解如何将 C# 与 Medical Imaging Server for DICOM 一起使用。
 
 ### cURL
 
-cURL is a common command line tool for calling web endpoints that is available for nearly any operating system. [Download cURL](https://curl.haxx.se/download.html) to get started. To use the examples, you'll need to replace the server name with your instance name, and download the [example DICOM files](../dcms) in this repo to a known location on your local file system. Refer to the [cURL examples](../tutorials/use-dicom-web-standard-apis-with-curl.md) to learn how to use cURL with the Medical Imaging Server for DICOM.
+cURL 是一种用于调用 Web 端点的常见命令行工具，可用于几乎任何操作系统。[下载 cURL](https://curl.haxx.se/download.html) 开始使用。要使用示例，您需要用实例名称替换服务器名称，并将此存储库中的[示例 DICOM 文件](../dcms) 下载到本地文件系统上的已知位置。参考 [cURL 示例](../tutorials/use-dicom-web-standard-apis-with-curl.md) 了解如何将 cURL 与 Medical Imaging Server for DICOM 一起使用。
 
 ### Postman
 
-Postman is an excellent tool for designing, building and testing REST APIs. [Download Postman](https://www.postman.com/downloads/) to get started. You can learn how to effectively use Postman at the [Postman learning site](https://learning.postman.com/).
+Postman 是设计、构建和测试 REST API 的优秀工具。[下载 Postman](https://www.postman.com/downloads/) 开始使用。您可以在 [Postman 学习网站](https://learning.postman.com/) 了解如何有效使用 Postman。
 
-One important caveat with Postman and the DICOMweb&trade; Standard: Postman can only support uploading DICOM files using the single part payload defined in the DICOM standard. This is because Postman cannot support custom separators in a multipart/related POST request. For more information, please see [https://github.com/postmanlabs/postman-app-support/issues/576](https://github.com/postmanlabs/postman-app-support/issues/576) for more information on this bug. Thus all examples in the Postman collection for uploading DICOM documents using a multipart request are prefixed with [will not work - see description]. The examples for uploading using a single part request are included in the collection and are prefixed with "Store-Single-Instance".
+Postman 和 DICOMweb&trade; 标准的一个重要注意事项：Postman 只能支持使用 DICOM 标准中定义的单部分有效负载上传 DICOM 文件。这是因为 Postman 无法支持 multipart/related POST 请求中的自定义分隔符。有关更多信息，请参阅 [https://github.com/postmanlabs/postman-app-support/issues/576](https://github.com/postmanlabs/postman-app-support/issues/576) 了解有关此错误的更多信息。因此，Postman 集合中使用 multipart 请求上传 DICOM 文档的所有示例都带有前缀 [will not work - see description]。使用单部分请求上传的示例包含在集合中，并带有前缀 "Store-Single-Instance"。
 
-To use the Postman collection, you'll need to download the collection locally and import the collection through Postman, which are available here: [Postman Collection Examples](../resources/Conformance-as-Postman.postman_collection.json). In the collection when you are asked to specify the base url, it is the full url of your service appended with the version (ex. `https://<app_service_url>/v<version>/`) For more information on versioning visit the [Api Versioning Documentation](../api-versioning.md). 
+要使用 Postman 集合，您需要将集合下载到本地，然后通过 Postman 导入集合，这些都可以在这里找到：[Postman 集合示例](../resources/Conformance-as-Postman.postman_collection.json)。在集合中，当要求您指定基础 URL 时，它是您的服务的完整 URL，后跟版本（例如 `https://<app_service_url>/v<version>/`）。有关版本控制的更多信息，请访问 [API 版本控制文档](../api-versioning.md)。
 
-## Summary
+## 总结
 
-This tutorial provided an overview of the APIs supported by the Medical Imaging Server for DICOM. Get started using these APIs with the following tools:
+本教程概述了 Medical Imaging Server for DICOM 支持的 API。使用以下工具开始使用这些 API：
 
-- [Use DICOM Web Standard APIs with C#](../tutorials/use-dicom-web-standard-apis-with-c%23.md)
-- [Use DICOM Web Standard APIs with cURL](../tutorials/use-dicom-web-standard-apis-with-curl.md)
-- [Use DICOM Web Standard APIs with Postman Example Collection](../resources/Conformance-as-Postman.postman_collection.json)
+- [使用 C# 的 DICOM Web 标准 API](../tutorials/use-dicom-web-standard-apis-with-c%23.md)
+- [使用 cURL 的 DICOM Web 标准 API](../tutorials/use-dicom-web-standard-apis-with-curl.md)
+- [使用 Postman 示例集合的 DICOM Web 标准 API](../resources/Conformance-as-Postman.postman_collection.json)

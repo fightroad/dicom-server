@@ -1,70 +1,70 @@
-# Medical Imaging Server for DICOM Performance Guidance
+# Medical Imaging Server for DICOM 性能指南
 
-When you deploy an instance of the Medical Imaging Server for DICOM, the following resources are important for performance in a production workload:
+当您部署 Medical Imaging Server for DICOM 实例时，以下资源对于生产工作负载的性能很重要：
 
-- **App Service Plan**: Hosts the Medical Imaging Service for DICOM.
-- **Azure SQL**: Indexes a subset of the Medical Imaging Server for DICOM metadata to support queries and to maintain a queryable log of changes.
-- **Storage Account**: Blob Storage which persists all Medical Imaging Server for DICOM data and metadata.
+- **App Service Plan**：托管 Medical Imaging Service for DICOM。
+- **Azure SQL**：索引 Medical Imaging Server for DICOM 元数据的子集，以支持查询并维护可查询的变更日志。
+- **存储帐户**：Blob 存储，持久化所有 Medical Imaging Server for DICOM 数据和元数据。
 
-This resource provides guidance on Azure App Service, SQL Database and Storage Account settings for the Medical Imaging Server for DICOM. Note, these are recommendations but may not fit the exact needs of your workload.
+本资源提供有关 Medical Imaging Server for DICOM 的 Azure App Service、SQL 数据库和存储帐户设置的指导。请注意，这些是建议，可能不完全适合您的工作负载需求。
 
 ## Azure App Service Plan
 
-The S1 tier is the default App Service Plan SKU enabled upon deployment. You can customize your App Service Plan SKU during deployment via the Medical Imaging Server for DICOM [Quickstart Deploy to Azure](../quickstarts/deploy-via-azure.md). You can also update your App Service Plan after deployment. You can find instructions to that at [Configure Medical Imaging Server for DICOM Settings](../how-to-guides/configure-dicom-server-settings.md).
+S1 层是部署时启用的默认 App Service Plan SKU。您可以通过 Medical Imaging Server for DICOM [快速入门部署到 Azure](../quickstarts/deploy-via-azure.md) 在部署期间自定义 App Service Plan SKU。您也可以在部署后更新 App Service Plan。您可以在[配置 Medical Imaging Server for DICOM 设置](../how-to-guides/configure-dicom-server-settings.md) 找到相关说明。
 
-Azure offers a variety of plans to meet your workload requirements. To learn more about the various plans, view the [App Service pricing](https://azure.microsoft.com/pricing/details/app-service/windows/). To learn how to update your Azure App Service Plan, refer to [Configure Medical Imaging Server for DICOM Settings](../how-to-guides/configure-dicom-server-settings.md).
+Azure 提供多种计划以满足您的工作负载需求。要了解有关各种计划的更多信息，请查看 [App Service 定价](https://azure.microsoft.com/pricing/details/app-service/windows/)。要了解如何更新 Azure App Service Plan，请参考[配置 Medical Imaging Server for DICOM 设置](../how-to-guides/configure-dicom-server-settings.md)。
 
-## Azure SQL Database Tier
+## Azure SQL 数据库层级
 
-The Standard tier of the DTU-based SQL performance tiers is enabled by default upon deployment. We recommend the DTU Purchase Model over the vCore model for the Medical Imaging Server for DICOM. In DTU-based SQL purchase models, a fixed set of resources is assigned to the database via performance tiers: Basic, Standard and Premium.
+默认情况下，部署时启用基于 DTU 的 SQL 性能层级的标准层。我们建议 Medical Imaging Server for DICOM 使用 DTU 购买模型而不是 vCore 模型。在基于 DTU 的 SQL 购买模型中，通过性能层级为数据库分配一组固定资源：基本、标准和高级。
 
-To review the various SQL Database Tiers from Azure, refer to [Azure SQL Database Pricing](https://azure.microsoft.com/pricing/details/sql-database/single/). To learn how to update your Azure SQL Database tier, refer to [Configure Medical Imaging Server for DICOM Settings](../how-to-guides/configure-dicom-server-settings.md).
+要查看 Azure 的各种 SQL 数据库层级，请参考 [Azure SQL 数据库定价](https://azure.microsoft.com/pricing/details/sql-database/single/)。要了解如何更新 Azure SQL 数据库层级，请参考[配置 Medical Imaging Server for DICOM 设置](../how-to-guides/configure-dicom-server-settings.md)。
 
-## Geo-Redundancy
+## 地理冗余
 
-For a production workload, we highly recommend configuring your Medical Imaging Server for DICOM to support geo-redundancy.
+对于生产工作负载，我们强烈建议配置 Medical Imaging Server for DICOM 以支持地理冗余。
 
-### Geo-Redundant Azure Storage
+### 地理冗余 Azure 存储
 
-Azure Storage offers geo-redundant storage to ensure high availability even in the event of a regional outage. We highly recommend choosing an Azure Storage Account Sku that supports geo-redundancy if you are running a production workload. Azure storage offers two options for geo-redundant replication, Geo-zone-redundant-storage (GZRS) and Geo-redundant-storage (GRS). Refer to this article to decide which geo-redundant Azure Storage option is right for you: [Use geo-redundancy to design highly available applications](https://docs.microsoft.com/en-us/azure/storage/common/geo-redundant-design).
+Azure 存储提供地理冗余存储，以确保即使在区域中断的情况下也能保持高可用性。如果您正在运行生产工作负载，我们强烈建议选择支持地理冗余的 Azure 存储帐户 SKU。Azure 存储为地理冗余复制提供两个选项：地理区域冗余存储 (GZRS) 和地理冗余存储 (GRS)。请参考本文以决定哪个地理冗余 Azure 存储选项适合您：[使用地理冗余设计高可用性应用程序](https://docs.microsoft.com/en-us/azure/storage/common/geo-redundant-design)。
 
-You can customize your Azure Storage Account SKU during deployment via the Medical Imaging Server for DICOM [Quickstart Deploy to Azure](../quickstarts/deploy-via-azure.md). By default, Standard LRS is selected, which is Standard Locally Redundant Storage.
+您可以通过 Medical Imaging Server for DICOM [快速入门部署到 Azure](../quickstarts/deploy-via-azure.md) 在部署期间自定义 Azure 存储帐户 SKU。默认情况下，选择 Standard LRS，即标准本地冗余存储。
 
-### Geo-replication for SQL Database
+### SQL 数据库的地理复制
 
-In addition to configuring geo-redundant Azure Storage, we recommend configuring active geo-replication for your Azure SQL Database. This allows you to create readable secondary databases of individual databases on a server in the same or different data center region. For a tutorial on how to configure this, see [Creating and using active geo-replication - Azure SQL Database](https://docs.microsoft.com/azure/azure-sql/database/active-geo-replication-overview).
+除了配置地理冗余 Azure 存储外，我们建议为 Azure SQL 数据库配置活动地理复制。这允许您在同一或不同数据中心区域的服务器上创建单个数据库的可读辅助数据库。有关如何配置此功能的教程，请参阅[创建和使用活动地理复制 - Azure SQL 数据库](https://docs.microsoft.com/azure/azure-sql/database/active-geo-replication-overview)。
 
-## Workload Scenarios for Azure SQL Database & Azure App Service
+## Azure SQL 数据库和 Azure App Service 的工作负载场景
 
-### Scenario 1: Testing out DICOM Server
+### 场景 1：测试 DICOM 服务器
 
-If you are testing out the Medical Imaging Server for DICOM and not running production workloads, we recommend using the S1 Azure App Service Tier alongside a Standard Azure SQL Database (S1, S2, S3). For a small system that does not require redundancy, with these tiers, you can spend as little as ~$70/month on Azure App Service & Azure SQL Database.
+如果您正在测试 Medical Imaging Server for DICOM 并且不运行生产工作负载，我们建议使用 S1 Azure App Service 层级以及标准 Azure SQL 数据库 (S1、S2、S3)。对于不需要冗余的小型系统，使用这些层级，您可以在 Azure App Service 和 Azure SQL 数据库上花费低至约 $70/月。
 
-At these tiers with an appropriate mix of STOW, WADO and QIDO requests, you can expect to handle between 2,000 and 20,000 requests/minute and a response time under 1 second. Larger files, usage patterns that lean heavily to STOW, and poor bandwidth will reduce the number of requests per minute. 
+在这些层级下，通过适当混合 STOW、WADO 和 QIDO 请求，您可以期望处理每分钟 2,000 到 20,000 个请求，响应时间低于 1 秒。较大的文件、严重偏向 STOW 的使用模式以及较差的带宽将减少每分钟的请求数。
 
-### Scenario 2: Production workload for a hospital system
+### 场景 2：医院系统的生产工作负载
 
-For a production workload, we recommend scaling up your Azure SQL Database to S12. For your Azure App Service, any Standard tier should be sufficient. If you are going into production, you also need to ensure your Medical Imaging Server for DICOM supports geo-redundancy. Refer to our [geo-redundancy guidelines](##Geo-Redundancy).
+对于生产工作负载，我们建议将 Azure SQL 数据库扩展到 S12。对于 Azure App Service，任何标准层级都应该足够。如果您要进入生产环境，还需要确保 Medical Imaging Server for DICOM 支持地理冗余。请参考我们的[地理冗余指南](#地理冗余)。
 
-We recommend the S1 Standard Azure App Service Tier along side an Azure SQL Tier of S12. At these tiers with an appropriate mix of STOW, WADO and QIDO requests, you can expect to handle between 1,000 and 20,000 requests/minutes with response times under 400 ms. Larger files, usage patterns that lean heavily to STOW, and poor bandwidth will reduce the number of requests per minute. We recommend testing performance with your data and indented use.
+我们建议使用 S1 标准 Azure App Service 层级以及 S12 的 Azure SQL 层级。在这些层级下，通过适当混合 STOW、WADO 和 QIDO 请求，您可以期望处理每分钟 1,000 到 20,000 个请求，响应时间低于 400 毫秒。较大的文件、严重偏向 STOW 的使用模式以及较差的带宽将减少每分钟的请求数。我们建议使用您的数据和预期用途测试性能。
 
-### Scenario 3: Bulk ingest of DICOM files
+### 场景 3：批量摄取 DICOM 文件
 
-If you workload requires bulk ingest of DICOM files or automated tooling to process DICOM files, we recommend scaling up your Azure App Service & Azure SQL Database to Premium tiers. If you are going into production, you also need to ensure your Medical Imaging Server for DICOM supports geo-redundancy. Refer to our [geo-redundancy guidelines](##Geo-Redundancy).
+如果您的工作负载需要批量摄取 DICOM 文件或自动化工具来处理 DICOM 文件，我们建议将 Azure App Service 和 Azure SQL 数据库扩展到高级层级。如果您要进入生产环境，还需要确保 Medical Imaging Server for DICOM 支持地理冗余。请参考我们的[地理冗余指南](#地理冗余)。
 
-To support a large number of DICOM transactions per day, we recommend a P1v2 tier for Azure App Service alongside a P11 tier for Azure SQL Database. With excellent bandwidth, relatively small images and and appropriate mix of STOW, WADO and QIDO requests, you can expect to handle between 40,000 and 100,000 requests/minutes with response times under 200 ms. Larger files, usage patterns that lean heavily to STOW, and poor bandwidth will reduce the number of requests per minute. We recommend testing performance with your data and indented use.
+为了支持每天大量 DICOM 事务，我们建议使用 P1v2 层级的 Azure App Service 以及 P11 层级的 Azure SQL 数据库。在出色的带宽、相对较小的图像以及适当混合 STOW、WADO 和 QIDO 请求的情况下，您可以期望处理每分钟 40,000 到 100,000 个请求，响应时间低于 200 毫秒。较大的文件、严重偏向 STOW 的使用模式以及较差的带宽将减少每分钟的请求数。我们建议使用您的数据和预期用途测试性能。
 
-### Comments about Performance Results
+### 关于性能结果的注释
 
-In order to estimate workloads, automated scale tests were performed to simulate a production environment. The guidance in this document is a suggestion and may need to be modified to meet your environment. A few important notes to consider while configuring your service:
+为了估算工作负载，执行了自动化规模测试以模拟生产环境。本文档中的指导是建议，可能需要修改以满足您的环境。在配置服务时需要考虑的几个重要注意事项：
 
-- Once you cross ~60% usage of your database, you will start to see a decline in performance.
-- The scale tests done for the guidance in this document were performed using 500 KB DICOM files.
-- Additionally, the scale tests were running with multiple concurrent callers. At fewer concurrent callers, you may have a higher request/minute and response time.
+- 一旦数据库使用率超过约 60%，您将开始看到性能下降。
+- 本文档指导的规模测试是使用 500 KB DICOM 文件执行的。
+- 此外，规模测试是在多个并发调用者的情况下运行的。在较少的并发调用者的情况下，您可能有更高的请求/分钟和响应时间。
 
-## Summary
+## 总结
 
-In this resource, we reviewed suggested guidance for Azure App Service tiers, Azure SQL tiers and Storage Account settings so that your Medical Imaging Server for DICOM can meet your  workload requirements:
+在本资源中，我们回顾了 Azure App Service 层级、Azure SQL 层级和存储帐户设置的建议指导，以便 Medical Imaging Server for DICOM 能够满足您的工作负载需求：
 
-- To get started with the Medical Imaging Server for DICOM, [Deploy to Azure](../quickstarts/deploy-via-azure.md).
-- If you already have configured an instance of the Medical Imaging Server for DICOM, [Configure your DICOM Server Settings](../how-to-guides/configure-dicom-server-settings.md).
+- 要开始使用 Medical Imaging Server for DICOM，请[部署到 Azure](../quickstarts/deploy-via-azure.md)。
+- 如果您已经配置了 Medical Imaging Server for DICOM 实例，请[配置 DICOM 服务器设置](../how-to-guides/configure-dicom-server-settings.md)。

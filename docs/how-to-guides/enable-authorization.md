@@ -1,18 +1,18 @@
-# Azure Active Directory Authorization
+# Azure Active Directory 授权
 
-This How-to Guide shows you how to configure the authorization settings for the Medical Imaging Server for DICOM through Azure. To complete this configuration, you will:
+本操作指南向您展示如何通过 Azure 配置 Medical Imaging Server for DICOM 的授权设置。要完成此配置，您将：
 
-1. **Update a resource application in Azure AD**: This resource application will be a representation of the Medical Imaging Server for DICOM that can be used to authorization and obtain tokens. The application registration will need to be updated to create appRoles. 
-1. **Assign the application roles in Azure AD**: Client application registrations, users, and groups need to be assigned the roles defined on the application registration.
-1. **Provide configuration to your Medical Imaging Server for DICOM**: Once the resource application is updated, you will set the authorization settings of your Medical Imaging Server for DICOM App Service.
+1. **在 Azure AD 中更新资源应用程序**：此资源应用程序将是 Medical Imaging Server for DICOM 的表示，可用于授权和获取令牌。需要更新应用程序注册以创建 appRoles。
+2. **在 Azure AD 中分配应用程序角色**：需要为客户端应用程序注册、用户和组分配在应用程序注册上定义的角色。
+3. **向 Medical Imaging Server for DICOM 提供配置**：更新资源应用程序后，您将设置 Medical Imaging Server for DICOM App Service 的授权设置。
 
-## Prerequisites
+## 先决条件
 
-1. **Complete the authentication configuration**: Instructions for enabling authentication can be found in the [Azure Active Directory Authentication](enable-authentication-with-tokens.md) article.
+1. **完成身份验证配置**：启用身份验证的说明可以在 [Azure Active Directory 身份验证](enable-authentication-with-tokens.md) 文章中找到。
 
-## Authorization Settings Overview
+## 授权设置概述
 
-The current authorization settings exposed in configuration are the following:
+配置中公开的当前授权设置如下：
 
 ```json
 
@@ -23,7 +23,7 @@ The current authorization settings exposed in configuration are the following:
         "Enabled": true,
         "RolesClaim": "role",
         "Roles": [
-            <DEFINED IN ROLES.JSON>
+            <在 ROLES.JSON 中定义>
         ]
       }
     }
@@ -31,30 +31,30 @@ The current authorization settings exposed in configuration are the following:
 }
 ```
 
-| Element                    | Description |
+| 元素                    | 描述 |
 | -------------------------- | --- |
-| Authorization:Enabled      | Whether or not the server has any authorization enabled. |
-| Authorization:RolesClaim   | Identifies the jwt claim that contains the assigned roles. This is set automatically by the `DevelopmentIdentityProvider`. |
-| Authorization:Roles        | The defined roles. The roles are defined via the `roles.json`. [Additional information can be found here](../development/roles.md) |
+| Authorization:Enabled      | 服务器是否启用了任何授权功能。 |
+| Authorization:RolesClaim   | 标识包含分配角色的 jwt 声明。这由 `DevelopmentIdentityProvider` 自动设置。 |
+| Authorization:Roles        | 定义的角色。角色通过 `roles.json` 定义。[更多信息可以在这里找到](../development/roles.md) |
 
-## Authorization setup with Azure AD
+## 使用 Azure AD 设置授权
 
-### Azure AD Instructions
+### Azure AD 说明
 
-#### Creating App Roles
-The instructions for adding app roles to an AAD application can be found [in this documentation article](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps). This documentation also optionally shows you how to assign an app role to an application.
+#### 创建应用角色
+向 AAD 应用程序添加应用角色的说明可以在[本文档文章](https://docs.microsoft.com/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps)中找到。本文档还可选地展示了如何将应用角色分配给应用程序。
 
-The app roles created need to match the name of the roles found in the `roles.json`. 
+创建的应用角色需要与 `roles.json` 中找到的角色名称匹配。
 
-#### Assigning Users to App Role
-This can be accomplished [via the Azure Portal](https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/add-application-portal-assign-users) or [via a PowerShell cmdlet](https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/assign-user-or-group-access-portal#assign-users-and-groups-to-an-app-using-powershell).
+#### 将用户分配到应用角色
+这可以通过 [Azure 门户](https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/add-application-portal-assign-users) 或 [PowerShell cmdlet](https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/assign-user-or-group-access-portal#assign-users-and-groups-to-an-app-using-powershell) 完成。
 
-### Provide configuration to your Medical Imaging Server for DICOM
-1. Make sure that you have deployed the `roles.json` to your web application
-1. Update the configuration to have the following two settings
+### 向 Medical Imaging Server for DICOM 提供配置
+1. 确保您已将 `roles.json` 部署到 Web 应用程序
+2. 更新配置以具有以下两个设置
     * `DicomServer:Security:Authorization:Enabled` = `true`
     * `DicomServer:Security:Authorization:RolesClaim` = `"role"`
 
-## Summary
+## 总结
 
-In this How-to Guide, you learned how to configure the authorization settings for the Medical Imaging Server for DICOM through Azure.
+在本操作指南中，您学习了如何通过 Azure 配置 Medical Imaging Server for DICOM 的授权设置。

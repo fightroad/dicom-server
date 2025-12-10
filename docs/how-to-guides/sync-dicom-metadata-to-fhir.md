@@ -1,96 +1,96 @@
-# Sync Medical Imaging Server for DICOM metadata into FHIR Server for Azure
+# 将 Medical Imaging Server for DICOM 元数据同步到 FHIR Server for Azure
 
-In this How-to Guide, you will learn how to sync Medical Imaging Server for DICOM metadata with FHIR. To do this, you will learn how to enable DICOM Cast by authentication with Managed Identity.
+在本操作指南中，您将学习如何将 Medical Imaging Server for DICOM 元数据与 FHIR 同步。为此，您将学习如何通过使用托管标识进行身份验证来启用 DICOM Cast。
 
-For healthcare organizations seeking to integrate clinical and imaging data through the FHIR® standard, DICOM Cast enables synchronizing of DICOM image changes to FHIR&trade; ImagingStudy resource. This allows you to sync DICOM studies, series and instances into the FHIR&trade; ImagingStudy resource.
+对于寻求通过 FHIR® 标准集成临床和影像数据的医疗组织，DICOM Cast 支持将 DICOM 图像变更同步到 FHIR&trade; ImagingStudy 资源。这允许您将 DICOM 研究、序列和实例同步到 FHIR&trade; ImagingStudy 资源。
 
-Once you have competed the [prerequisites](#Prerequisites) and [enabled authentication](#Configure-Authentication-using-Managed-Identity) between your Medical Imaging Server for DICOM, your FHIR Server and your DICOM Cast deployment, you have enabled DICOM Cast. When you upload files to your Medical Imaging Server for DICOM, the corresponding FHIR resources will be persisted in your FHIR server.
+一旦您完成了[先决条件](#先决条件)并在 Medical Imaging Server for DICOM、FHIR 服务器和 DICOM Cast 部署之间[启用了身份验证](#使用托管标识配置身份验证)，您就启用了 DICOM Cast。当您将文件上传到 Medical Imaging Server for DICOM 时，相应的 FHIR 资源将持久化到您的 FHIR 服务器中。
 
-To learn more about DICOM Cast, see the [DICOM Cast Concept](../concepts/dicom-cast.md).
+要了解有关 DICOM Cast 的更多信息，请参阅 [DICOM Cast 概念](../concepts/dicom-cast.md)。
 
-## Prerequisites
+## 先决条件
 
-To enable DICOM Cast, you need to complete the following steps:
+要启用 DICOM Cast，您需要完成以下步骤：
 
-1. [Deploy a Medical Imaging Server for DICOM](../quickstarts/deploy-via-azure.md)
-1. [Deploy a FHIR Server](https://github.com/microsoft/fhir-server)
-1. [Deploy DICOM Cast](../quickstarts/deploy-dicom-cast.md)
+1. [部署 Medical Imaging Server for DICOM](../quickstarts/deploy-via-azure.md)
+2. [部署 FHIR 服务器](https://github.com/microsoft/fhir-server)
+3. [部署 DICOM Cast](../quickstarts/deploy-dicom-cast.md)
 
-> NOTE: When deploying a OSS FHIR Server, set the **Sql Schema Automatic Updates Enabled** setting to be *true*. This determines whether the sql schema should be automatically initialized and upgraded on server setup.
+> 注意：部署 OSS FHIR 服务器时，将 **Sql Schema Automatic Updates Enabled** 设置设置为 *true*。这确定是否应在服务器设置时自动初始化和升级 sql 架构。
 
-## Configure Authentication using Managed Identity
+## 使用托管标识配置身份验证
 
-Currently there are three types of authentication supported for both the FHIR Server for Azure and the Medical Imaging Server for DICOM: Managed Identity, OAuth2 Client Credential and OAuth2 User Password. The authentication can be configured via the application settings by the appropriate values in the `Authentication` property of the given server. For details on the three types, see [DICOM Cast authentication](/converter/dicom-cast/docs/authentication.md).
+目前，FHIR Server for Azure 和 Medical Imaging Server for DICOM 都支持三种类型的身份验证：托管标识、OAuth2 客户端凭据和 OAuth2 用户密码。可以通过在给定服务器的 `Authentication` 属性中设置适当的值，通过应用程序设置配置身份验证。有关这三种类型的详细信息，请参阅 [DICOM Cast 身份验证](/converter/dicom-cast/docs/authentication.md)。
 
-This section will provide an end to end guide for configuring authentication with Managed Identity.
+本节将提供使用托管标识配置身份验证的端到端指南。
 
-### Create a resource application for FHIR and DICOM servers
+### 为 FHIR 和 DICOM 服务器创建资源应用程序
 
-For both your FHIR and DICOM servers, you will create a resource application in Azure. Follow the instructions below for each server, once for your Medical Imaging Server for DICOM and once for your FHIR Server.
+对于 FHIR 和 DICOM 服务器，您将在 Azure 中创建资源应用程序。请按照以下说明为每个服务器执行一次，一次为 Medical Imaging Server for DICOM，一次为 FHIR 服务器。
 
-1. Sign into the [Azure Portal](https://ms.portal.azure.com/). Search for **App Services** and select the FHIR or DICOM App Service. Copy the **URL** of the App Service.
-1. Select **Azure Active Directory** > **App Registrations** > **New registration**:
-    1. Enter a **Name** for your app registration.
-    2. In **Redirect URI**, select **Web** and enter the **URL** of your App Service.
-    3. Select **Register**.
-1. Select **Expose an API** > **Set**. You can specify a URI as the **URL** of your app service or use the generated App ID URI. Select **Save**.
-1. Select **Add a Scope**:
-    1. In **Scope name**, enter *user_impersonation*.
-    1. In the text boxes, add an admin consent display name and admin consent description you want users to see on the consent page. For example, *access my app*.
+1. 登录 [Azure 门户](https://ms.portal.azure.com/)。搜索 **App Services** 并选择 FHIR 或 DICOM App Service。复制 App Service 的 **URL**。
+2. 选择 **Azure Active Directory** > **应用注册** > **新注册**：
+    1. 输入应用注册的**名称**。
+    2. 在**重定向 URI** 中，选择 **Web** 并输入 App Service 的 **URL**。
+    3. 选择**注册**。
+3. 选择**公开 API** > **设置**。您可以将 URI 指定为应用服务的 **URL** 或使用生成的 App ID URI。选择**保存**。
+4. 选择**添加范围**：
+    1. 在**范围名称**中，输入 *user_impersonation*。
+    2. 在文本框中，添加您希望用户在同意页面上看到的管理员同意显示名称和管理员同意描述。例如，*访问我的应用*。
 
-### Set the Authentication for your FHIR & DICOM App Services
+### 为 FHIR 和 DICOM App Services 设置身份验证
 
-For both your FHIR and DICOM servers, you will set the Audience and Authority for Authentication. Follow the instructions below for each server, once for your Medical Imaging Server for DICOM and once for your FHIR Server.
+对于 FHIR 和 DICOM 服务器，您将设置身份验证的 Audience 和 Authority。请按照以下说明为每个服务器执行一次，一次为 Medical Imaging Server for DICOM，一次为 FHIR 服务器。
 
-1. Navigate to the App Service that you deployed to Azure.
-1. Select **Configuration** to update the **Audience**, **Authority**, and **Security:Enabled**:
-    1. Set the **Application ID URI** from the App Service as the **Audience**.
-    1. **Authority** is whichever tenant your application exists in, for example: ```https://login.microsoftonline.com/<tenant-name>.onmicrosoft.com```.
-    1.  Set **Security:Enabled** to be ```True```.
-    1.  Save your changes to the configuration.
+1. 导航到您部署到 Azure 的 App Service。
+2. 选择**配置**以更新 **Audience**、**Authority** 和 **Security:Enabled**：
+    1. 将 App Service 的**应用程序 ID URI** 设置为 **Audience**。
+    2. **Authority** 是您的应用程序所在的租户，例如：```https://login.microsoftonline.com/<tenant-name>.onmicrosoft.com```。
+    3.  将 **Security:Enabled** 设置为 ```True```。
+    4.  保存对配置的更改。
 
-### Update Key Vault for DICOM Cast
+### 更新 DICOM Cast 的 Key Vault
 
-1. Navigate to the DICOM Cast Key Vault that was created when you deployed DICOM Cast.
-1. Select **Access Policies** in the menu bar and click **Add Access Policy**.
-    1. Under **Configure from template**, select **Secret Management**.
-    1. Under **Select principal**, click **None selected**. Search for your Service Principle, click **Select** and then **Add**.
-    1. Select **Save**.
-1. Select **Secrets** in the menu bar and click **Generate/Import**. Use the tables below to add secrets for your DICOM and FHIR servers. For each secret, use the **Manual Upload option** and click **Create**:
+1. 导航到部署 DICOM Cast 时创建的 DICOM Cast Key Vault。
+2. 在菜单栏中选择**访问策略**，然后单击**添加访问策略**。
+    1. 在**从模板配置**下，选择**机密管理**。
+    2. 在**选择主体**下，单击**未选择**。搜索您的服务主体，单击**选择**，然后单击**添加**。
+    3. 选择**保存**。
+3. 在菜单栏中选择**机密**，然后单击**生成/导入**。使用下面的表格为 DICOM 和 FHIR 服务器添加机密。对于每个机密，使用**手动上传选项**并单击**创建**：
 
-#### Medical Imaging Server for DICOM Secrets
+#### Medical Imaging Server for DICOM 机密
 
-| Name | Value |
+| 名称 | 值 |
 | :------- | :----- |
 | DICOM--Endpoint | ```<dicom-server-url>``` |
 | DicomWeb--Authentication--Enabled | true |
 | DicomWeb--Authentication--AuthenticationType | ManagedIdentity |
 | DicomWeb--Authentication--ManagedIdentityCredential--Resource | ```<dicom-audience>``` |
 
-#### FHIR Server Secrets
+#### FHIR 服务器机密
 
-| Name | Value |
+| 名称 | 值 |
 | :------- | :----- |
 | Fhir--Endpoint | ```<fhir-server-url>``` |
 | Fhir--Authentication--Enabled | true |
 | Fhir--Authentication--AuthenticationType | ManagedIdentity |
 | Fhir--Authentication--ManagedIdentityCredential--Resource | ```<fhir-server-url>``` |
 
-### Restart Azure Container Instance for DICOM Cast
+### 重启 DICOM Cast 的 Azure Container Instance
 
-Now that you have enabled Authentication for DICOM Cast, you have to Stop and Start the Azure Container Instance to pickup the new configurations:
+现在您已经为 DICOM Cast 启用了身份验证，您必须停止并启动 Azure Container Instance 以获取新配置：
 
-1. Navigate to the Container Instance created when you deployed DICOM Cast.
-1. Click **Stop** and then **Start**.
+1. 导航到部署 DICOM Cast 时创建的 Container Instance。
+2. 单击**停止**，然后单击**启动**。
 
-## Summary
+## 总结
 
-In this How-to Guide, you learned how to enable DICOM Cast by authentication with Managed Identity. Now you can upload DICOM files to your Medical Imaging Server for DICOM, and the corresponding FHIR resources will be populated in your FHIR server.
+在本操作指南中，您学习了如何通过使用托管标识进行身份验证来启用 DICOM Cast。现在您可以将 DICOM 文件上传到 Medical Imaging Server for DICOM，相应的 FHIR 资源将填充到您的 FHIR 服务器中。
 
-To manage authentication with OAuth2 Client Credentials or OAuth2 User Passwords, see [DICOM Cast authentication](/converter/dicom-cast/docs/authentication.md).
+要使用 OAuth2 客户端凭据或 OAuth2 用户密码管理身份验证，请参阅 [DICOM Cast 身份验证](/converter/dicom-cast/docs/authentication.md)。
 
-For an overview of DICOM Cast, see [DICOM Cast Concept](../concepts/dicom-cast.md).
+有关 DICOM Cast 的概述，请参阅 [DICOM Cast 概念](../concepts/dicom-cast.md)。
 
-To upload files to your DICOM Server, refer to [Use the Medical Imaging Server APIs](../tutorials/use-the-medical-imaging-server-apis.md).
+要将文件上传到 DICOM 服务器，请参考[使用 Medical Imaging Server API](../tutorials/use-the-medical-imaging-server-apis.md)。
 
-You can [Access FHIR Server with Postman](https://docs.microsoft.com/azure/healthcare-apis/access-fhir-postman-tutorial) to see the FHIR resources populated via DICOM Cast.
+您可以[使用 Postman 访问 FHIR 服务器](https://docs.microsoft.com/azure/healthcare-apis/access-fhir-postman-tutorial) 以查看通过 DICOM Cast 填充的 FHIR 资源。

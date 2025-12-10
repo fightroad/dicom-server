@@ -1,14 +1,14 @@
-# Version 2 DICOM Conformance Statement
+# 版本 2 DICOM 符合性声明
 
-> API version 2 is the latest API version.
+> API 版本 2 是最新的 API 版本。
 
-The **Medical Imaging Server for DICOM** supports a subset of the DICOMweb&trade; Standard. Support includes:
+**Medical Imaging Server for DICOM** 支持 DICOMweb&trade; 标准的子集。支持包括：
 
 - [Studies Service](#studies-service)
   - [Store (STOW-RS)](#store-stow-rs)
   - [Retrieve (WADO-RS)](#retrieve-wado-rs)
   - [Search (QIDO-RS)](#search-qido-rs)
-  - [Delete (Non-standard)](#delete)
+  - [Delete (非标准)](#delete)
 - [Worklist Service (UPS Push and Pull SOPs)](#worklist-service-ups-rs)
   - [Create Workitem](#create-workitem)
   - [Retrieve Workitem](#retrieve-workitem)
@@ -17,55 +17,53 @@ The **Medical Imaging Server for DICOM** supports a subset of the DICOMweb&trade
   - [Request Cancellation](#request-cancellation)
   - [Search Workitems](#search-workitems)
 
-Additionally, the following non-standard API(s) are supported:
+此外，支持以下非标准 API：
 - [Change Feed](../concepts/change-feed.md)
 - [Extended Query Tags](../concepts/extended-query-tags.md)
 - [Bulk update](../concepts/bulk-update.md)
 
-All paths below include an implicit base URL of the server, such as `https://localhost:63838` when running locally.
+下面的所有路径都包含服务器的隐式基础 URL，例如在本地运行时为 `https://localhost:63838`。
 
-The service makes use of REST Api versioning. Do note that the version of the REST API must be explicitly specified as part of the base URL as in the following example:
+服务使用 REST API 版本控制。请注意，REST API 的版本必须明确指定为基础 URL 的一部分，如下例所示：
 
 `https://localhost:63838/v1/studies`
 
-For more information on how to specify the version when making requests, visit the [Api Versioning Documentation](../api-versioning.md).
+有关如何在发出请求时指定版本的更多信息，请访问 [API 版本控制文档](../api-versioning.md)。
 
-You can find example requests for supported transactions in the [Postman collection](../resources/Conformance-as-Postman.postman_collection.json).
+您可以在 [Postman 集合](../resources/Conformance-as-Postman.postman_collection.json) 中找到支持事务的示例请求。
 
-## Preamble Sanitization
+## 前导码清理
 
-The service ignores the 128-byte File Preamble, and replaces its contents with null characters. This ensures that no files passed through the service are
-vulnerable to the [malicious preamble vulnerability](https://dicom.nema.org/medical/dicom/current/output/chtml/part10/sect_7.5.html). However, this also means
-that [preambles used to encode dual format content](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6489422/) such as TIFF cannot be used with the service.
+服务忽略 128 字节的文件前导码，并将其内容替换为空字符。这确保通过服务的任何文件都不会受到[恶意前导码漏洞](https://dicom.nema.org/medical/dicom/current/output/chtml/part10/sect_7.5.html)的影响。但是，这也意味着[用于编码双格式内容的前导码](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6489422/)（如 TIFF）不能与服务一起使用。
 
 # Studies Service
 
-The [Studies Service](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#chapter_10) allows users to store, retrieve, and search for DICOM Studies, Series, and Instances. We have added the non-standard Delete transaction to enable a full resource lifecycle.
+[Studies Service](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#chapter_10) 允许用户存储、检索和搜索 DICOM 研究、序列和实例。我们添加了非标准 Delete 事务以启用完整的资源生命周期。
 
 ## Store (STOW-RS)
 
-This transaction uses the POST method to Store representations of Studies, Series, and Instances contained in the request payload.
+此事务使用 POST 方法存储请求有效负载中包含的研究、序列和实例的表示。
 
-| Method | Path               | Description |
+| 方法 | 路径               | 描述 |
 | :----- | :----------------- | :---------- |
-| POST   | ../studies         | Store instances. |
-| POST   | ../studies/{study} | Store instances for a specific study. |
+| POST   | ../studies         | 存储实例。 |
+| POST   | ../studies/{study} | 为特定研究存储实例。 |
 
-Parameter `study` corresponds to the DICOM attribute StudyInstanceUID. If specified, any instance that does not belong to the provided study will be rejected with `43265` warning code.
+参数 `study` 对应于 DICOM 属性 StudyInstanceUID。如果指定，任何不属于提供的研究的实例将被拒绝，并返回 `43265` 警告代码。
 
-The following `Accept` header(s) for the response are supported:
+支持以下响应 `Accept` 标头：
 
 - `application/dicom+json`
 
-The following `Content-Type` header(s) are supported:
+支持以下 `Content-Type` 标头：
 
 - `multipart/related; type="application/dicom"`
 - `application/dicom`
 
-> Note: the Server will <u>not</u> coerce or replace data in the DICOM PS 3.10 file. The DICOM file will be stored as provided, except where otherwise noted.
+> 注意：服务器将<u>不会</u>强制或替换 DICOM PS 3.10 文件中的数据。DICOM 文件将按提供的方式存储，除非另有说明。
 
-### Store Required Attributes
-The following DICOM elements are required to be present in every DICOM file attempting to be stored:
+### Store 必需属性
+尝试存储的每个 DICOM 文件中必须存在以下 DICOM 元素：
 
 - StudyInstanceUID
 - SeriesInstanceUID
@@ -73,63 +71,63 @@ The following DICOM elements are required to be present in every DICOM file atte
 - SOPClassUID
 - PatientID
 
-> Note: All identifiers must be between 1 and 64 characters long, and only contain alpha numeric characters or the following special characters: `.`, `-`. PatientID continues to be a required tag and can have the value as null in the input. PatientID is validated based on its LO VR type.
+> 注意：所有标识符必须介于 1 到 64 个字符之间，并且只能包含字母数字字符或以下特殊字符：`.`、`-`。PatientID 仍然是必需的标签，在输入中可以具有 null 值。PatientID 根据其 LO VR 类型进行验证。
 
-Each file stored must have a unique combination of StudyInstanceUID, SeriesInstanceUID and SopInstanceUID. The warning code `45070` will be returned if a file with the same identifiers already exists.
+每个存储的文件必须具有 StudyInstanceUID、SeriesInstanceUID 和 SopInstanceUID 的唯一组合。如果已存在具有相同标识符的文件，将返回警告代码 `45070`。
 
-> Requests are limited to 2GB. No single DICOM file or combination of files may exceed this limit.
+> 请求限制为 2GB。任何单个 DICOM 文件或文件组合都不能超过此限制。
 
-### Store Changes From V1
-In previous versions, a Store request would fail if any of the [required](#store-required-attributes) or [searchable attributes](#searchable-attributes) failed validation. Beginning with V2, the request will only fail if **required attributes** fail validation.
+### Store 从 V1 的更改
+在以前的版本中，如果任何[必需](#store-required-attributes)或[可搜索属性](#searchable-attributes)验证失败，Store 请求将失败。从 V2 开始，只有在**必需属性**验证失败时，请求才会失败。
 
-Failed validation of attributes not required by the API will still result in the file being stored and a warning will be given about each failing attribute per instance.
-When a sequence contains an attribute that fails validation, or when there are multiple issues with a single attribute, only the first failing attribute reason will be noted.
+API 不需要的属性的验证失败仍将导致文件被存储，并且将为每个实例的每个失败属性提供警告。
+当序列包含验证失败的属性，或者单个属性存在多个问题时，仅会记录第一个失败属性的原因。
 
-If an attribute is padded with nulls, the attribute will be indexed when searchable and will be stored as is in dicom+json metadata. No validation warning will be provided.
+如果属性用 null 填充，则该属性在可搜索时将被索引，并将按原样存储在 dicom+json 元数据中。不会提供验证警告。
 
-### Store Response Status Codes
+### Store 响应状态代码
 
-| Code                         | Description                                                                                                                                                                                                                         |
+| 代码                         | 描述                                                                                                                                                                                                                         |
 | :--------------------------- |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 200 (OK)                     | All the SOP instances in the request have been stored.                                                                                                                                                                              |
-| 202 (Accepted)               | The origin server stored some of the Instances and others have failed or returned warnings. Additional information regarding this error may be found in the response message body. |
-| 204 (No Content)             | No content was provided in the store transaction request.                                                                                                                                                                           |
-| 400 (Bad Request)            | The request was badly formatted. For example, the provided study instance identifier did not conform the expected UID format.                                                                                                       |
-| 401 (Unauthorized)           | The client is not authenticated.                                                                                                                                                                                                    |
-| 406 (Not Acceptable)         | The specified `Accept` header is not supported.                                                                                                                                                                                     |
-| 409 (Conflict)               | None of the instances in the store transaction request have been stored.                                                                                                                                                            |
-| 415 (Unsupported Media Type) | The provided `Content-Type` is not supported.                                                                                                                                                                                       |
-| 503 (Service Unavailable)    | The service is unavailable or busy. Please try again later.                                                                                                                                                                         |
+| 200 (OK)                     | 请求中的所有 SOP 实例已存储。                                                                                                                                                                              |
+| 202 (Accepted)               | 源服务器存储了部分实例，其他实例失败或返回警告。有关此错误的更多信息可能在响应消息体中找到。 |
+| 204 (No Content)             | 存储事务请求中未提供内容。                                                                                                                                                                           |
+| 400 (Bad Request)            | 请求格式错误。例如，提供的研究实例标识符不符合预期的 UID 格式。                                                                                                       |
+| 401 (Unauthorized)           | 客户端未经过身份验证。                                                                                                                                                                                                    |
+| 406 (Not Acceptable)         | 不支持指定的 `Accept` 标头。                                                                                                                                                                                     |
+| 409 (Conflict)               | 存储事务请求中的任何实例都未存储。                                                                                                                                                            |
+| 415 (Unsupported Media Type) | 不支持提供的 `Content-Type`。                                                                                                                                                                                       |
+| 503 (Service Unavailable)    | 服务不可用或繁忙。请稍后重试。                                                                                                                                                                         |
 
-### Store Response Payload
+### Store 响应有效负载
 
-The response payload will populate a DICOM dataset with the following elements:
+响应有效负载将填充具有以下元素的 DICOM 数据集：
 
-| Tag          | Name                  | Description |
+| 标签          | 名称                  | 描述 |
 | :----------- | :-------------------- | :---------- |
-| (0008, 1190) | RetrieveURL           | The Retrieve URL of the study if the StudyInstanceUID was provided in the store request and at least one instance is successfully stored. |
-| (0008, 1198) | FailedSOPSequence     | The sequence of instances that failed to store. |
-| (0008, 1199) | ReferencedSOPSequence | The sequence of stored instances. |
+| (0008, 1190) | RetrieveURL           | 如果在存储请求中提供了 StudyInstanceUID 并且至少成功存储了一个实例，则为研究的检索 URL。 |
+| (0008, 1198) | FailedSOPSequence     | 存储失败的实例序列。 |
+| (0008, 1199) | ReferencedSOPSequence | 已存储实例的序列。 |
 
-Each dataset in the `FailedSOPSequence` will have the following elements (if the DICOM file attempting to be stored could be read):
+`FailedSOPSequence` 中的每个数据集将具有以下元素（如果尝试存储的 DICOM 文件可以读取）：
 
-| Tag          | Name                     | Description                                                                        |
+| 标签          | 名称                     | 描述                                                                        |
 |:-------------|:-------------------------|:-----------------------------------------------------------------------------------|
-| (0008, 1150) | ReferencedSOPClassUID    | The SOP class unique identifier of the instance that failed to store.              |
-| (0008, 1155) | ReferencedSOPInstanceUID | The SOP instance unique identifier of the instance that failed to store.           |
-| (0008, 1197) | FailureReason            | The reason code why this instance failed to store.                                 |
-| (0008, 1196) | WarningReason            | The reason code why this instance successfully to store, but may have issues.      |
-| (0074, 1048) | FailedAttributesSequence | The sequence of `ErrorComment` that includes the reason for each failed attribute. |
+| (0008, 1150) | ReferencedSOPClassUID    | 存储失败的实例的 SOP 类唯一标识符。              |
+| (0008, 1155) | ReferencedSOPInstanceUID | 存储失败的实例的 SOP 实例唯一标识符。           |
+| (0008, 1197) | FailureReason            | 此实例存储失败的原因代码。                                 |
+| (0008, 1196) | WarningReason            | 此实例成功存储但可能有问题的原因代码。      |
+| (0074, 1048) | FailedAttributesSequence | 包含每个失败属性原因的 `ErrorComment` 序列。 |
 
-Each dataset in the `ReferencedSOPSequence` will have the following elements:
+`ReferencedSOPSequence` 中的每个数据集将具有以下元素：
 
-| Tag          | Name                     | Description |
+| 标签          | 名称                     | 描述 |
 | :----------- | :----------------------- | :---------- |
-| (0008, 1150) | ReferencedSOPClassUID    | The SOP class unique identifier of the instance that was stored. |
-| (0008, 1155) | ReferencedSOPInstanceUID | The SOP instance unique identifier of the instance that was stored. |
-| (0008, 1190) | RetrieveURL              | The retrieve URL of this instance on the DICOM server. |
+| (0008, 1150) | ReferencedSOPClassUID    | 已存储实例的 SOP 类唯一标识符。 |
+| (0008, 1155) | ReferencedSOPInstanceUID | 已存储实例的 SOP 实例唯一标识符。 |
+| (0008, 1190) | RetrieveURL              | 此实例在 DICOM 服务器上的检索 URL。 |
 
-An example response with `Accept` header `application/dicom+json` without a FailedAttributesSequence in a ReferencedSOPSequence:
+使用 `Accept` 标头 `application/dicom+json` 的示例响应，ReferencedSOPSequence 中没有 FailedAttributesSequence：
 
 ```json
 {
@@ -184,7 +182,7 @@ An example response with `Accept` header `application/dicom+json` without a Fail
 }
 ```
 
-An example response with `Accept` header `application/dicom+json` with a FailedAttributesSequence in a ReferencedSOPSequence:
+使用 `Accept` 标头 `application/dicom+json` 的示例响应，ReferencedSOPSequence 中包含 FailedAttributesSequence：
 
 ```json
 {
@@ -245,197 +243,197 @@ An example response with `Accept` header `application/dicom+json` with a FailedA
 }
 ```
 
-### Store Failure Reason Codes
+### Store 失败原因代码
 
-| Code  | Description |
+| 代码  | 描述 |
 | :---- | :---------- |
-| 272   | The store transaction did not store the instance because of a general failure in processing the operation. |
-| 43264 | The DICOM instance failed the validation. |
-| 43265 | The provided instance StudyInstanceUID did not match the specified StudyInstanceUID in the store request. |
-| 45070 | A DICOM instance with the same StudyInstanceUID, SeriesInstanceUID and SopInstanceUID has already been stored. If you wish to update the contents, delete this instance first. |
-| 45071 | A DICOM instance is being created by another process, or the previous attempt to create has failed and the cleanup process has not had chance to clean up yet. Please delete the instance first before attempting to create again. |
+| 272   | 由于处理操作时的一般故障，存储事务未存储实例。 |
+| 43264 | DICOM 实例验证失败。 |
+| 43265 | 提供的实例 StudyInstanceUID 与存储请求中指定的 StudyInstanceUID 不匹配。 |
+| 45070 | 已存储具有相同 StudyInstanceUID、SeriesInstanceUID 和 SopInstanceUID 的 DICOM 实例。如果您希望更新内容，请先删除此实例。 |
+| 45071 | 另一个进程正在创建 DICOM 实例，或者之前的创建尝试失败且清理过程尚未有机会清理。请在再次尝试创建之前先删除实例。 |
 
-### Store Warning Reason Codes
+### Store 警告原因代码
 
-| Code  | Description                                                                                                                                            |
+| 代码  | 描述                                                                                                                                            |
 |:------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 45063 | The Studies Store Transaction (Section 10.5) observed that the Data Set did not match the constraints of the SOP Class during storage of the instance. |
-| 1     | The Studies Store Transaction (Section 10.5) observed that the Data Set has validation warnings.                                                       |
+| 45063 | 研究存储事务（第 10.5 节）观察到在存储实例期间数据集不符合 SOP 类的约束。 |
+| 1     | 研究存储事务（第 10.5 节）观察到数据集有验证警告。                                                       |
 
-### Store Error Codes
+### Store 错误代码
 
-| Code  | Description |
+| 代码  | 描述 |
 | :---- | :---------- |
-| 100   | The provided instance attributes did not meet the validation criteria. |
+| 100   | 提供的实例属性不符合验证标准。 |
 
 ## Retrieve (WADO-RS)
 
-This Retrieve Transaction offers support for retrieving stored studies, series, instances and frames by reference.
+此检索事务支持通过引用检索存储的研究、序列、实例和帧。
 
-| Method | Path                                                                    | Description |
+| 方法 | 路径                                                                    | 描述 |
 | :----- | :---------------------------------------------------------------------- | :---------- |
-| GET    | ../studies/{study}                                                      | Retrieves all instances within a study. |
-| GET    | ../studies/{study}/metadata                                             | Retrieves the metadata for all instances within a study. |
-| GET    | ../studies/{study}/series/{series}                                      | Retrieves all instances within a series. |
-| GET    | ../studies/{study}/series/{series}/metadata                             | Retrieves the metadata for all instances within a series. |
-| GET    | ../studies/{study}/series/{series}/instances/{instance}                 | Retrieves a single instance. |
-| GET    | ../studies/{study}/series/{series}/instances/{instance}/metadata        | Retrieves the metadata for a single instance. |
-| GET    | ../studies/{study}/series/{series}/instances/{instance}/rendered        | Retrieves an instance rendered into an image format |
-| GET    | ../studies/{study}/series/{series}/instances/{instance}/frames/{frames} | Retrieves one or many frames from a single instance. To specify more than one frame, a comma separate each frame to return, e.g. /studies/1/series/2/instance/3/frames/4,5,6 |
-| GET    | ../studies/{study}/series/{series}/instances/{instance}/frames/{frame}/rendered | Retrieves a single frame rendered into an image format |
+| GET    | ../studies/{study}                                                      | 检索研究中的所有实例。 |
+| GET    | ../studies/{study}/metadata                                             | 检索研究中所有实例的元数据。 |
+| GET    | ../studies/{study}/series/{series}                                      | 检索序列中的所有实例。 |
+| GET    | ../studies/{study}/series/{series}/metadata                             | 检索序列中所有实例的元数据。 |
+| GET    | ../studies/{study}/series/{series}/instances/{instance}                 | 检索单个实例。 |
+| GET    | ../studies/{study}/series/{series}/instances/{instance}/metadata        | 检索单个实例的元数据。 |
+| GET    | ../studies/{study}/series/{series}/instances/{instance}/rendered        | 检索渲染为图像格式的实例 |
+| GET    | ../studies/{study}/series/{series}/instances/{instance}/frames/{frames} | 从单个实例检索一个或多个帧。要指定多个帧，请用逗号分隔每个要返回的帧，例如 /studies/1/series/2/instance/3/frames/4,5,6 |
+| GET    | ../studies/{study}/series/{series}/instances/{instance}/frames/{frame}/rendered | 检索渲染为图像格式的单个帧 |
 
-### Retrieve instances within Study or Series
+### 在研究或序列中检索实例
 
-The following `Accept` header(s) are supported for retrieving instances within a study or a series:
+支持以下 `Accept` 标头用于在研究或序列中检索实例：
 
 
 - `multipart/related; type="application/dicom"; transfer-syntax=*`
-- `multipart/related; type="application/dicom";` (when transfer-syntax is not specified, 1.2.840.10008.1.2.1 is used as default)
+- `multipart/related; type="application/dicom";`（未指定传输语法时，默认使用 1.2.840.10008.1.2.1）
 - `multipart/related; type="application/dicom"; transfer-syntax=1.2.840.10008.1.2.1`
 - `multipart/related; type="application/dicom"; transfer-syntax=1.2.840.10008.1.2.4.90`
-- `*/*` (when transfer-syntax is not specified, `*` is used as default and mediaType defaults to `application/dicom`)
+- `*/*`（未指定传输语法时，默认使用 `*`，mediaType 默认为 `application/dicom`）
 
-### Retrieve an Instance
+### 检索实例
 
-The following `Accept` header(s) are supported for retrieving a specific instance:
+支持以下 `Accept` 标头用于检索特定实例：
 
 - `application/dicom; transfer-syntax=*`
 - `multipart/related; type="application/dicom"; transfer-syntax=*`
-- `application/dicom;` (when transfer-syntax is not specified, `1.2.840.10008.1.2.1` is used as default)
-- `multipart/related; type="application/dicom"` (when transfer-syntax is not specified, `1.2.840.10008.1.2.1` is used as default)
+- `application/dicom;`（未指定传输语法时，默认使用 `1.2.840.10008.1.2.1`）
+- `multipart/related; type="application/dicom"`（未指定传输语法时，默认使用 `1.2.840.10008.1.2.1`）
 - `application/dicom; transfer-syntax=1.2.840.10008.1.2.1`
 - `multipart/related; type="application/dicom"; transfer-syntax=1.2.840.10008.1.2.1`
 - `application/dicom; transfer-syntax=1.2.840.10008.1.2.4.90`
 - `multipart/related; type="application/dicom"; transfer-syntax=1.2.840.10008.1.2.4.90`
-- `*/*` (when transfer-syntax is not specified, `*` is used as default and mediaType defaults to `application/dicom`)
+- `*/*`（未指定传输语法时，默认使用 `*`，mediaType 默认为 `application/dicom`）
 
-### Retrieve Frames
+### 检索帧
 
-The following `Accept` headers are supported for retrieving frames:
+支持以下 `Accept` 标头用于检索帧：
 - `multipart/related; type="application/octet-stream"; transfer-syntax=*`
-- `multipart/related; type="application/octet-stream";` (when transfer-syntax is not specified, `1.2.840.10008.1.2.1` is used as default)
+- `multipart/related; type="application/octet-stream";`（未指定传输语法时，默认使用 `1.2.840.10008.1.2.1`）
 - `multipart/related; type="application/octet-stream"; transfer-syntax=1.2.840.10008.1.2.1`
-- `multipart/related; type="image/jp2";` (when transfer-syntax is not specified, `1.2.840.10008.1.2.4.90` is used as default)
+- `multipart/related; type="image/jp2";`（未指定传输语法时，默认使用 `1.2.840.10008.1.2.4.90`）
 - `multipart/related; type="image/jp2";transfer-syntax=1.2.840.10008.1.2.4.90`
-- `application/octet-stream; transfer-syntax=*` for single frame retrieval
-- `*/*` (when transfer-syntax is not specified, `*` is used as default and mediaType defaults to `application/octet-stream`)
+- `application/octet-stream; transfer-syntax=*`（用于单帧检索）
+- `*/*`（未指定传输语法时，默认使用 `*`，mediaType 默认为 `application/octet-stream`）
 
-### Retrieve Transfer Syntax
+### 检索传输语法
 
-When the requested transfer syntax is different from original file, the original file is transcoded to requested transfer syntax. The original file needs to be one of below formats for transcoding to succeed, otherwise transcoding may fail:
-- 1.2.840.10008.1.2 (Little Endian Implicit)
-- 1.2.840.10008.1.2.1 (Little Endian Explicit)
-- 1.2.840.10008.1.2.2 (Explicit VR Big Endian)
-- 1.2.840.10008.1.2.4.50 (JPEG Baseline Process 1)
-- 1.2.840.10008.1.2.4.57 (JPEG Lossless)
-- 1.2.840.10008.1.2.4.70 (JPEG Lossless Selection Value 1)
-- 1.2.840.10008.1.2.4.90 (JPEG 2000 Lossless Only)
-- 1.2.840.10008.1.2.4.91 (JPEG 2000)
-- 1.2.840.10008.1.2.5 (RLE Lossless)
+当请求的传输语法与原始文件不同时，原始文件会被转码为请求的传输语法。原始文件需要是以下格式之一才能成功转码，否则转码可能失败：
+- 1.2.840.10008.1.2（小端隐式）
+- 1.2.840.10008.1.2.1（小端显式）
+- 1.2.840.10008.1.2.2（显式 VR 大端）
+- 1.2.840.10008.1.2.4.50（JPEG 基线过程 1）
+- 1.2.840.10008.1.2.4.57（JPEG 无损）
+- 1.2.840.10008.1.2.4.70（JPEG 无损选择值 1）
+- 1.2.840.10008.1.2.4.90（JPEG 2000 仅无损）
+- 1.2.840.10008.1.2.4.91（JPEG 2000）
+- 1.2.840.10008.1.2.5（RLE 无损）
 
-An unsupported `transfer-syntax` will result in `406 Not Acceptable`.
+不支持的 `transfer-syntax` 将导致 `406 Not Acceptable`。
 
-### Retrieve Metadata (for Study, Series, or Instance)
+### 检索元数据（研究、序列或实例）
 
-The following `Accept` header(s) are supported for retrieving metadata for a study, a series, or an instance:
+支持以下 `Accept` 标头用于检索研究、序列或实例的元数据：
 
 - `application/dicom+json`
 
-Retrieving metadata will not return attributes with the following value representations:
+检索元数据不会返回具有以下值表示（VR）的属性：
 
-| VR Name | Description            |
+| VR 名称 | 描述            |
 | :------ | :--------------------- |
-| OB      | Other Byte             |
-| OD      | Other Double           |
-| OF      | Other Float            |
-| OL      | Other Long             |
-| OV      | Other 64-Bit Very Long |
-| OW      | Other Word             |
-| UN      | Unknown                |
+| OB      | 其他字节             |
+| OD      | 其他双精度           |
+| OF      | 其他浮点数            |
+| OL      | 其他长整型             |
+| OV      | 其他 64 位超长 |
+| OW      | 其他字             |
+| UN      | 未知                |
 
-Retrieved metadata will include the null character when the attribute was padded with nulls and stored as is.
+当属性用 null 填充并按原样存储时，检索的元数据将包含 null 字符。
 
-### Retrieve Metadata Cache Validation (for Study, Series, or Instance)
+### 检索元数据缓存验证（研究、序列或实例）
 
-Cache validation is supported using the `ETag` mechanism. In the response of a metadata reqeuest, ETag is returned as one of the headers. This ETag can be cached and added as `If-None-Match` header in the later requests for the same metadata. Two types of responses are possible if the data exists:
-- Data has not changed since the last request: HTTP 304 (Not Modified) response will be sent with no body.
-- Data has changed since the last request: HTTP 200 (OK) response will be sent with updated ETag. Required data will also be returned as part of the body.
+支持使用 `ETag` 机制进行缓存验证。在元数据请求的响应中，ETag 作为标头之一返回。此 ETag 可以缓存并在后续对相同元数据的请求中作为 `If-None-Match` 标头添加。如果数据存在，可能出现两种类型的响应：
+- 自上次请求以来数据未更改：将发送 HTTP 304（未修改）响应，无响应体。
+- 自上次请求以来数据已更改：将发送带有更新 ETag 的 HTTP 200（OK）响应。所需数据也将作为响应体的一部分返回。
 
-### Retrieve Rendered Image (For Instance or Frame)
-The following `Accept` header(s) are supported for retrieving a rendered image an instance or a frame:
+### 检索渲染图像（实例或帧）
+支持以下 `Accept` 标头用于检索实例或帧的渲染图像：
 
 - `image/jpeg`
 - `image/png`
 
-In the case that no `Accept` header is specified the service will render an `image/jpeg` by default.
+如果未指定 `Accept` 标头，服务将默认渲染 `image/jpeg`。
 
-The service only supports rendering of a single frame. If rendering is requested for an instance with multiple frames then only the first frame will be rendered as an image by default.
+服务仅支持单帧渲染。如果请求渲染具有多个帧的实例，则默认仅渲染第一帧。
 
-When specifying a particular frame to return, frame indexing starts at 1.
+指定要返回的特定帧时，帧索引从 1 开始。
 
-The `quality` query parameter is also supported. An integer value between `1-100` inclusive (1 being worst quality, and 100 being best quality) may be passed as the value for the query paramater. This will only be used for images rendered as `jpeg`, and will be ignored for `png` render requests. If not specified will default to `100`.
+还支持 `quality` 查询参数。可以将 `1-100` 之间的整数值（1 表示最差质量，100 表示最佳质量）作为查询参数的值传递。这仅用于渲染为 `jpeg` 的图像，对于 `png` 渲染请求将被忽略。如果未指定，将默认为 `100`。
 
-### Retrieve original Image (For Instance and Metadata)
+### 检索原始图像（实例和元数据）
 
-If you have performed bulk update operation, you can retrieve the original image or metadata by specifying the `msdicom-request-original` header. The value of the header can be `true` or `false`. If the value is `true`, the original image or metadata will be returned. If the value is `false`, the updated image or metadata will be returned. If the value is not specified, the updated image or metadata will be returned.
+如果您执行了批量更新操作，可以通过指定 `msdicom-request-original` 标头来检索原始图像或元数据。标头的值可以是 `true` 或 `false`。如果值为 `true`，将返回原始图像或元数据。如果值为 `false`，将返回更新的图像或元数据。如果未指定值，将返回更新的图像或元数据。
 
-> Note: For more information on list of endpoints supported, please refer to [Bulk update retrieve](../concepts/bulk-update.md#retrieve-wado-rs).
+> 注意：有关支持的端点列表的更多信息，请参阅[批量更新检索](../concepts/bulk-update.md#retrieve-wado-rs)。
 
-### Retrieve Response Status Codes
+### Retrieve 响应状态代码
 
-| Code                         | Description |
+| 代码                         | 描述 |
 | :--------------------------- | :---------- |
-| 200 (OK)                     | All requested data has been retrieved. |
-| 304 (Not Modified)           | The requested data has not modified since the last request. Content is not added to the response body in such case. Please see [Retrieve Metadata Cache Validation (for Study, Series, or Instance)](###Retrieve-Metadata-Cache-Validation-(for-Study,-Series,-or-Instance)) for more information. |
-| 400 (Bad Request)            | The request was badly formatted. For example, the provided study instance identifier did not conform the expected UID format or the requested transfer-syntax encoding is not supported. |
-| 401 (Unauthorized)           | The client is not authenticated. |
-| 403 (Forbidden)              | The user isn't authorized. |
-| 404 (Not Found)              | The specified DICOM resource could not be found or for rendered request the instance did not contain pixel data |
-| 406 (Not Acceptable)         | The specified `Accept` header is not supported or for rendered and transcode requests the file requested was too large  |
-| 503 (Service Unavailable)    | The service is unavailable or busy. Please try again later. |
+| 200 (OK)                     | 已检索所有请求的数据。 |
+| 304 (Not Modified)           | 自上次请求以来请求的数据未修改。在这种情况下，响应体中不会添加内容。有关更多信息，请参阅[检索元数据缓存验证（研究、序列或实例）](###Retrieve-Metadata-Cache-Validation-(for-Study,-Series,-or-Instance))。 |
+| 400 (Bad Request)            | 请求格式错误。例如，提供的研究实例标识符不符合预期的 UID 格式，或者不支持请求的传输语法编码。 |
+| 401 (Unauthorized)           | 客户端未经过身份验证。 |
+| 403 (Forbidden)              | 用户未授权。 |
+| 404 (Not Found)              | 找不到指定的 DICOM 资源，或者对于渲染请求，实例不包含像素数据 |
+| 406 (Not Acceptable)         | 不支持指定的 `Accept` 标头，或者对于渲染和转码请求，请求的文件太大  |
+| 503 (Service Unavailable)    | 服务不可用或繁忙。请稍后重试。 |
 
 ## Search (QIDO-RS)
 
-Query based on ID for DICOM Objects (QIDO) enables you to search for studies, series and instances by attributes.
+基于 ID 的 DICOM 对象查询（QIDO）使您能够按属性搜索研究、序列和实例。
 
-| Method | Path                                            | Description                       |
+| 方法 | 路径                                            | 描述 |
 | :----- | :---------------------------------------------- | :-------------------------------- |
-| *Search for Studies*                                                                         |
-| GET    | ../studies?...                                  | Search for studies                |
-| *Search for Series*                                                                          |
-| GET    | ../series?...                                   | Search for series                 |
-| GET    |../studies/{study}/series?...                    | Search for series in a study      |
-| *Search for Instances*                                                                       |
-| GET    |../instances?...                                 | Search for instances              |
-| GET    |../studies/{study}/instances?...                 | Search for instances in a study   |
-| GET    |../studies/{study}/series/{series}/instances?... | Search for instances in a series  |
+| *搜索研究* |
+| GET    | ../studies?...                                  | 搜索研究 |
+| *搜索序列* |
+| GET    | ../series?...                                   | 搜索序列 |
+| GET    |../studies/{study}/series?...                    | 在研究内搜索序列 |
+| *搜索实例* |
+| GET    |../instances?...                                 | 搜索实例 |
+| GET    |../studies/{study}/instances?...                 | 在研究内搜索实例 |
+| GET    |../studies/{study}/series/{series}/instances?... | 在序列内搜索实例 |
 
-The following `Accept` header(s) are supported for searching:
+支持以下 `Accept` 标头用于搜索：
 
 - `application/dicom+json`
 
-### Search Changes From V1
-If an instance returned validation warnings for [searchable attributes](#searchable-attributes) at the time the [instance was stored](#store-changes-from-v1), those attributes may not be used to search for the stored instance. However, any [searchable attributes](#searchable-attributes) that failed validation will be able to return results if the values are overwritten by instances in the same study/series that are stored after the failed one, or if the values are already stored correctly by a previous instance. If the attribute values are not overwritten, then they will not produce any search results.
+### 从 V1 的搜索变更
+如果实例在[存储](#store-changes-from-v1)时对[可搜索属性](#searchable-attributes)返回了验证警告，则这些属性可能无法用于搜索已存储的实例。然而，如果这些属性在同一研究/序列中被后续实例覆盖，或先前实例已正确存储，则失败的[可搜索属性](#searchable-attributes)仍可返回结果。如果属性值未被覆盖，则不会产生搜索结果。
 
-An attribute can be corrected in the following ways:
-- Delete the stored instance and upload a new instance with the corrected data
-- Upload a new instance in the same study/series with corrected data
+属性可以通过以下方式纠正：
+- 删除已存储的实例并上传带有更正数据的新实例
+- 在同一研究/序列中上传带有更正数据的新实例
 
-### Supported Search Parameters
+### 支持的搜索参数
 
-The following parameters for each query are supported:
+每个查询支持以下参数：
 
-| Key              | Support Value(s)              | Allowed Count | Description |
+| 键              | 支持的值              | 允许计数 | 描述 |
 | :--------------- | :---------------------------- | :------------ | :---------- |
-| `{attributeID}=` | {value}                       | 0...N         | Search for attribute/ value matching in query. |
-| `includefield=`  | `{attributeID}`<br/>`all`   | 0...N         | The additional attributes to return in the response. Both, public and private tags are supported.<br/>When `all` is provided, please see [Search Response](###Search-Response) for more information about which attributes will be returned for each query type.<br/>If a mixture of {attributeID} and 'all' is provided, the server will default to using 'all'. |
-| `limit=`         | {value}                       | 0..1          | Integer value to limit the number of values returned in the response.<br/>Value can be between the range 1 >= x <= 200. Defaulted to 100. |
-| `offset=`        | {value}                       | 0..1          | Skip {value} results.<br/>If an offset is provided larger than the number of search query results, a 204 (no content) response will be returned. |
-| `fuzzymatching=` | `true` \| `false`             | 0..1          | If true fuzzy matching is applied to PatientName attribute. It will do a prefix word match of any name part inside PatientName value. For example, if PatientName is "John^Doe", then "joh", "do", "jo do", "Doe" and "John Doe" will all match. However "ohn" will not match. |
+| `{attributeID}=` | {value}                       | 0...N         | 在查询中搜索属性/值匹配。 |
+| `includefield=`  | `{attributeID}`<br/>`all`   | 0...N         | 响应中要返回的附加属性。支持公共和私有标签。<br/>当提供 `all` 时，请参阅[搜索响应](###Search-Response)以了解每个查询类型将返回哪些属性的更多信息。<br/>如果混合提供 {attributeID} 和 'all'，服务器将默认使用 'all'。 |
+| `limit=`         | {value}                       | 0..1          | 限制响应中返回值数量的整数值。值范围 1-200，默认 100。 |
+| `offset=`        | {value}                       | 0..1          | 跳过 {value} 个结果。如果偏移量大于结果数量，将返回 204（无内容）。 |
+| `fuzzymatching=` | `true` \| `false`             | 0..1          | 如果为 true，则对 PatientName 属性应用模糊匹配，进行名称部分的前缀匹配。例如 PatientName 为 \"John^Doe\" 时，\"joh\"、\"do\"、\"jo do\"、\"Doe\"、\"John Doe\" 都匹配，\"ohn\" 不匹配。 |
 
-#### Searchable Attributes
+#### 可搜索属性
 
-We support searching on below attributes and search type.
+支持在以下属性和搜索类型上进行搜索。
 
 | Attribute Keyword | All Studies | All Series | All Instances | Study's Series | Study's Instances | Study Series' Instances |
 | :---------------- | :---: | :----: | :------: | :---: | :----: | :------: |
@@ -454,11 +452,11 @@ We support searching on below attributes and search type.
 | ManufacturerModelName | | X | X | X | X |  |
 | SOPInstanceUID |  |  | X |  | X | X |
 
-> Note: We do not support searching using empty string for any attributes. 
+> 注意：不支持使用空字符串搜索任何属性。
 
-#### Search Matching
+#### 搜索匹配
 
-We support below matching types.
+支持以下匹配类型。
 
 | Search Type | Supported Attribute | Example |
 | :---------- | :------------------ | :------ |
@@ -466,23 +464,23 @@ We support below matching types.
 | Exact Match | All supported attributes | {attributeID}={value1} |
 | Fuzzy Match | PatientName, ReferringPhysicianName | Matches any component of the name which starts with the value. |
 
-#### Attribute ID
+#### 属性 ID
 
-Tags can be encoded in a number of ways for the query parameter. We have partially implemented the standard as defined in [PS3.18 6.7.1.1.1](http://dicom.nema.org/medical/dicom/2019a/output/chtml/part18/sect_6.7.html#sect_6.7.1.1.1). The following encodings for a tag are supported:
+标签可以通过多种方式编码为查询参数。我们部分实现了 [PS3.18 6.7.1.1.1](http://dicom.nema.org/medical/dicom/2019a/output/chtml/part18/sect_6.7.html#sect_6.7.1.1.1) 中定义的标准。支持以下标签编码：
 
 | Value            | Example          |
 | :--------------- | :--------------- |
 | {group}{element} | 0020000D         |
 | {dicomKeyword}   | StudyInstanceUID |
 
-Example query searching for instances:
+搜索实例的示例查询：
 `../instances?Modality=CT&00280011=512&includefield=00280010&limit=5&offset=0`
 
-### Search Response
+### 搜索响应
 
-The response will be an array of DICOM datasets. Depending on the resource, by *default* the following attributes are returned:
+响应将是 DICOM 数据集的数组。根据资源，*默认*返回以下属性：
 
-#### Default Study tags
+#### 默认 Study 标签
 
 | Tag          | Attribute Name |
 | :----------- | :------------- |
@@ -495,7 +493,7 @@ The response will be an array of DICOM datasets. Depending on the resource, by *
 | (0010, 0030) | PatientBirthDate |
 | (0020, 000D) | StudyInstanceUID |
 
-#### Default Series tags
+#### 默认 Series 标签
 
 | Tag          | Attribute Name |
 | :----------- | :------------- |
@@ -504,15 +502,15 @@ The response will be an array of DICOM datasets. Depending on the resource, by *
 | (0020, 000E) | SeriesInstanceUID |
 | (0040, 0244) | PerformedProcedureStepStartDate |
 
-#### Default Instance tags
+#### 默认 Instance 标签
 
 | Tag          | Attribute Name |
 | :----------- | :------------- |
 | (0008, 0018) | SOPInstanceUID |
 
-If `includefield=all`, below attributes are included along with default attributes. Along with default attributes, this is the full list of attributes supported at each resource level.
+如果 `includefield=all`，以下属性将与默认属性一起包含。与默认属性一起，这是每个资源级别支持的完整属性列表。
 
-#### Additional Study tags
+#### 附加 Study 标签
 
 | Tag          | Attribute Name |
 | :----------- | :------------- |
@@ -533,7 +531,7 @@ If `includefield=all`, below attributes are included along with default attribut
 | (0010, 0040) | PatientSex |
 | (0020, 0010) | StudyID |
 
-#### Additional Series tags
+#### 附加 Series 标签
 
 | Tag          | Attribute Name |
 | :----------- | :------------- |
@@ -547,7 +545,7 @@ If `includefield=all`, below attributes are included along with default attribut
 | (0040, 0245) | PerformedProcedureStepStartTime |
 | (0040, 0275) | RequestAttributesSequence |
 
-#### Additional Instance tags
+#### 附加 Instance 标签
 
 | Tag          | Attribute Name |
 | :----------- | :------------- |
@@ -561,312 +559,300 @@ If `includefield=all`, below attributes are included along with default attribut
 | (0028, 0100) | BitsAllocated |
 | (0028, 0008) | NumberOfFrames |
 
-The following attributes are returned:
+返回以下属性：
 
-- All the match query parameters and UIDs in the resource url.
-- `IncludeField` attributes supported at that resource level.
-- If the target resource is `All Series`, then `Study` level attributes are also returned.
-- If the target resource is `All Instances`, then `Study` and `Series` level attributes are also returned.
-- If the target resource is `Study's Instances`, then `Series` level attributes are also returned.
-- `NumberOfStudyRelatedInstances` aggregated attribute is supported in `Study` level includeField.
-- `NumberOfSeriesRelatedInstances` aggregated attribute is supported in `Series` level includeField.
+- 资源 URL 中的所有匹配查询参数和 UID。
+- 该资源级别支持的 `IncludeField` 属性。
+- 如果目标资源是 `All Series`，则还返回 `Study` 级别属性。
+- 如果目标资源是 `All Instances`，则还返回 `Study` 和 `Series` 级别属性。
+- 如果目标资源是 `Study's Instances`，则还返回 `Series` 级别属性。
+- `NumberOfStudyRelatedInstances` 聚合属性在 `Study` 级别 includeField 中受支持。
+- `NumberOfSeriesRelatedInstances` 聚合属性在 `Series` 级别 includeField 中受支持。
 
-### Search Response Codes
+### 搜索响应代码
 
-The query API will return one of the following status codes in the response:
+查询 API 将在响应中返回以下状态代码之一：
 
-| Code                      | Description |
+| 代码                      | 描述 |
 | :------------------------ | :---------- |
-| 200 (OK)                  | The response payload contains all the matching resource. |
-| 204 (No Content)          | The search completed successfully but returned no results. |
-| 400 (Bad Request)         | The server was unable to perform the query because the query component was invalid. Response body contains details of the failure. |
-| 401 (Unauthorized)        | The client is not authenticated. |
-| 403 (Forbidden)           | The user isn't authorized. |
-| 503 (Service Unavailable) | The service is unavailable or busy. Please try again later. |
+| 200 (OK)                  | 响应有效负载包含所有匹配的资源。 |
+| 204 (No Content)          | 搜索成功完成但未返回结果。 |
+| 400 (Bad Request)         | 服务器无法执行查询，因为查询组件无效。响应体包含失败的详细信息。 |
+| 401 (Unauthorized)        | 客户端未经过身份验证。 |
+| 403 (Forbidden)           | 用户未授权。 |
+| 503 (Service Unavailable) | 服务不可用或繁忙。请稍后重试。 |
 
-### Additional Notes
+### 附加说明
 
-- Querying using the `TimezoneOffsetFromUTC` (`00080201`) is not supported.
-- The query API will not return 413 (request entity too large). If the requested query response limit is outside of the acceptable range, a bad request will be returned. Anything requested within the acceptable range, will be resolved.
-- When target resource is Study/Series there is a potential for inconsistent study/series level metadata across multiple instances. For example, two instances could have different patientName. In this case latest will win and you can search only on the latest data.
-- Paged results are optimized to return matched *newest* instance first, this may result in duplicate records in subsequent pages if newer data matching the query was added.
-- Matching is case in-sensitive and accent in-sensitive for PN VR types.
-- Matching is case in-sensitive and accent sensitive for other string VR types.
-- Only the first value will be indexed of a single valued data element that incorrectly has multiple values.
-- Using the default attributes or limiting the number of results requested will maximize performance.
-- When an attribute was stored using null padding, it can be searched for with or without the null padding in uri encoding. Results retrieved will be for attributes stored both with and without null padding.
+- 不支持使用 `TimezoneOffsetFromUTC` (`00080201`) 进行查询。
+- 查询 API 不会返回 413（请求实体太大）。如果请求的查询响应限制超出可接受范围，将返回错误请求。在可接受范围内请求的任何内容都将被解析。
+- 当目标资源是 Study/Series 时，多个实例之间可能存在不一致的研究/序列级别元数据。例如，两个实例可能具有不同的 patientName。在这种情况下，最新的将获胜，您只能搜索最新数据。
+- 分页结果经过优化，首先返回匹配的*最新*实例，如果添加了匹配查询的新数据，这可能导致后续页面中出现重复记录。
+- 对于 PN VR 类型，匹配不区分大小写且不区分重音。
+- 对于其他字符串 VR 类型，匹配不区分大小写但区分重音。
+- 对于错误地具有多个值的单值数据元素，仅索引第一个值。
+- 使用默认属性或限制请求的结果数量将最大化性能。
+- 当属性使用 null 填充存储时，可以在 URI 编码中使用或不使用 null 填充进行搜索。检索结果将涵盖带或不带 null 填充存储的属性。
 
 ## Delete
 
-This transaction is not part of the official DICOMweb&trade; Standard. It uses the DELETE method to remove representations of Studies, Series, and Instances from the store.
+此事务不是官方 DICOMweb&trade; 标准的一部分。它使用 DELETE 方法从存储中删除研究、序列和实例的表示。
 
-| Method | Path                                                    | Description |
+| 方法 | 路径                                                    | 描述 |
 | :----- | :------------------------------------------------------ | :---------- |
-| DELETE | ../studies/{study}                                      | Delete all instances for a specific study. |
-| DELETE | ../studies/{study}/series/{series}                      | Delete all instances for a specific series within a study. |
-| DELETE | ../studies/{study}/series/{series}/instances/{instance} | Delete a specific instance within a series. |
+| DELETE | ../studies/{study}                                      | 删除特定研究的所有实例。 |
+| DELETE | ../studies/{study}/series/{series}                      | 删除研究中特定序列的所有实例。 |
+| DELETE | ../studies/{study}/series/{series}/instances/{instance} | 删除序列中的特定实例。 |
 
-Parameters `study`, `series` and `instance` correspond to the DICOM attributes StudyInstanceUID, SeriesInstanceUID and SopInstanceUID respectively.
+参数 `study`、`series` 和 `instance` 分别对应于 DICOM 属性 StudyInstanceUID、SeriesInstanceUID 和 SopInstanceUID。
 
-There are no restrictions on the request's `Accept` header, `Content-Type` header or body content.
+对请求的 `Accept` 标头、`Content-Type` 标头或正文内容没有限制。
 
-> Note: After a Delete transaction the deleted instances will not be recoverable.
-> If you have performed bulk update and delete operations, both the versions are deleted and not recoverable. For more information, see [Bulk update](../concepts/bulk-update.md#delete).
+> 注意：删除事务后，已删除的实例将无法恢复。<br/>
+> 如果您执行了批量更新和删除操作，两个版本都会被删除且不可恢复。更多信息参见 [Bulk update](../concepts/bulk-update.md#delete)。
 
-### Response Status Codes
+### 响应状态代码
 
-| Code                         | Description |
+| 代码                         | 描述 |
 | :--------------------------- | :---------- |
-| 204 (No Content)             | When all the SOP instances have been deleted. |
-| 400 (Bad Request)            | The request was badly formatted. |
-| 401 (Unauthorized)           | The client is not authenticated. |
-| 401 (Unauthorized)           | The client isn't authenticated. |
-| 403 (Forbidden)              | The user isn't authorized. |
-| 404 (Not Found)              | When the specified series was not found within a study, or the specified instance was not found within the series. |
-| 503 (Service Unavailable)    | The service is unavailable or busy. Please try again later. |
+| 204 (No Content)             | 当所有 SOP 实例都已删除时。 |
+| 400 (Bad Request)            | 请求格式错误。 |
+| 401 (Unauthorized)           | 客户端未经过身份验证。 |
+| 403 (Forbidden)              | 用户未授权。 |
+| 404 (Not Found)              | 当在研究内找不到指定的序列，或在序列内找不到指定的实例时。 |
+| 503 (Service Unavailable)    | 服务不可用或繁忙。请稍后重试。 |
 
-### Delete Response Payload
+### Delete 响应有效负载
 
-The response body will be empty. The status code is the only useful information returned.
+响应体将为空。状态代码是返回的唯一有用信息。
 
 # Worklist Service (UPS-RS)
 
-The DICOM service supports the Push and Pull SOPs of the [Worklist Service (UPS-RS)](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#chapter_11). This service provides access to one Worklist containing Workitems, each of which represents a Unified Procedure Step (UPS).
+DICOM 服务支持 [Worklist Service (UPS-RS)](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#chapter_11) 的 Push 和 Pull SOP。此服务提供对一个包含工作项的列表的访问，每个工作项代表一个统一过程步骤（UPS）。
 
-Throughout, the variable `{workitem}` in a URI template stands for a Workitem UID.
+在整个文档中，URI 模板中的变量 `{workitem}` 代表工作项 UID。
 
 ## Create Workitem
 
-This transaction uses the POST method to create a new Workitem.
+此事务使用 POST 方法创建新的工作项。
 
-| Method | Path               | Description |
+| 方法 | 路径               | 描述 |
 | :----- | :----------------- | :---------- |
-| POST   | `../workitems`         | Create a Workitem. |
-| POST   | `../workitems?{workitem}` | Creates a Workitem with the specified UID. |
+| POST   | `../workitems`         | 创建工作项。 |
+| POST   | `../workitems?{workitem}` | 使用指定的 UID 创建工作项。 |
 
 
-If not specified in the URI, the payload dataset must contain the Workitem in the SOPInstanceUID attribute.
+如果未在 URI 中指定，有效负载数据集必须在 SOPInstanceUID 属性中包含工作项。
 
-The `Accept` and `Content-Type` headers are required in the request, and must both have the value `application/dicom+json`.
+请求中需要 `Accept` 和 `Content-Type` 标头，并且都必须具有值 `application/dicom+json`。
 
-There are a number of requirements related to DICOM data attributes in the context of a specific transaction. Attributes may be
-required to be present, required to not be present, required to be empty, or required to not be empty. These requirements can be
-found in [this table](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3).
+在特定事务的上下文中，有许多与 DICOM 数据属性相关的要求。属性可能被要求存在、要求不存在、要求为空或要求不为空。这些要求可以在[此表](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3)中找到。
 
-Notes on dataset attributes:
-- **SOP Instance UID:** Although the reference table above says that SOP Instance UID should not be present, this guidance is specific to the DIMSE protocol and is
-handled diferently in DICOMWeb&trade;. SOP Instance UID **should be present** in the dataset if not in the URI.
-- **Conditional requirement codes:** All the conditional requirement codes including 1C and 2C are treated as optional.
+关于数据集属性的说明：
+- **SOP Instance UID：** 尽管上表说 SOP Instance UID 不应存在，但此指导特定于 DIMSE 协议，在 DICOMWeb&trade; 中的处理方式不同。如果不在 URI 中，SOP Instance UID **应该存在于**数据集中。
+- **条件要求代码：** 包括 1C 和 2C 在内的所有条件要求代码都被视为可选。
 
-### Create Response Status Codes
+### Create 响应状态代码
 
-| Code                         | Description |
+| 代码                         | 描述 |
 | :--------------------------- | :---------- |
-| 201 (Created)                | The target Workitem was successfully created. |
-| 400 (Bad Request)            | There was a problem with the request. For example, the request payload did not satisfy the requirements above. |
-| 401 (Unauthorized)           | The client is not authenticated. |
-| 403 (Forbidden)              | The user isn't authorized. |
-| 409 (Conflict)               | The Workitem already exists. |
-| 415 (Unsupported Media Type) | The provided `Content-Type` is not supported. |
-| 503 (Service Unavailable)    | The service is unavailable or busy. Please try again later. |
+| 201 (Created)                | 目标工作项已成功创建。 |
+| 400 (Bad Request)            | 请求有问题。例如，请求有效负载不满足上述要求。 |
+| 401 (Unauthorized)           | 客户端未经过身份验证。 |
+| 403 (Forbidden)              | 用户未授权。 |
+| 409 (Conflict)               | 工作项已存在。 |
+| 415 (Unsupported Media Type) | 不支持提供的 `Content-Type`。 |
+| 503 (Service Unavailable)    | 服务不可用或繁忙。请稍后重试。 |
 
-### Create Response Payload
+### Create 响应有效负载
 
-A success response will have no payload. The `Location` and `Content-Location` response headers will contain
-a URI reference to the created Workitem.
+成功响应将没有有效负载。`Location` 和 `Content-Location` 响应标头将包含对已创建工作项的 URI 引用。
 
-A failure response payload will contain a message describing the failure.
+失败响应有效负载将包含描述失败的消息。
 
 ## Request Cancellation
 
-This transaction enables the user to request cancellation of a non-owned Workitem.
+此事务使用户能够请求取消非拥有的工作项。
 
-There are
-[four valid Workitem states](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.1.1-1):
+有[四种有效的工作项状态](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.1.1-1)：
 - `SCHEDULED`
 - `IN PROGRESS`
 - `CANCELED`
 - `COMPLETED`
 
-This transaction will only succeed against Workitems in the `SCHEDULED` state. Any user can claim ownership of a Workitem by
-setting its Transaction UID and changing its state to `IN PROGRESS`. From then on, a user can only modify the Workitem by providing
-the correct Transaction UID. While UPS defines Watch and Event SOP classes that allow cancellation requests and other events to be
-forwarded, this DICOM service does not implement these classes, and so cancellation requests on workitems that are `IN PROGRESS` will
-return failure. An owned Workitem can be canceled via the [Change Workitem State](#change-workitem-state) transaction.
+此事务仅对处于 `SCHEDULED` 状态的工作项成功。任何用户都可以通过设置其事务 UID 并将其状态更改为 `IN PROGRESS` 来声明工作项的所有权。从那时起，用户只能通过提供正确的事务 UID 来修改工作项。虽然 UPS 定义了允许转发取消请求和其他事件的 Watch 和 Event SOP 类，但此 DICOM 服务不实现这些类，因此对处于 `IN PROGRESS` 状态的工作项的取消请求将返回失败。拥有的工作项可以通过[更改工作项状态](#change-workitem-state)事务取消。
 
-| Method  | Path                                            | Description                                      |
+| 方法  | 路径                                            | 描述                                      |
 | :------ | :---------------------------------------------- | :----------------------------------------------- |
-| POST    | ../workitems/{workitem}/cancelrequest           | Request the cancellation of a scheduled Workitem |
+| POST    | ../workitems/{workitem}/cancelrequest           | 请求取消已计划的工作项 |
 
-The `Content-Type` headers is required, and must have the value `application/dicom+json`.
+需要 `Content-Type` 标头，并且必须具有值 `application/dicom+json`。
 
-The request payload may include Action Information as [defined in the DICOM Standard](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.2-1).
+请求有效负载可以包含[在 DICOM 标准中定义](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.2-1)的操作信息。
 
-### Request Cancellation Response Status Codes
+### Request Cancellation 响应状态代码
 
-| Code                         | Description |
+| 代码                         | 描述 |
 | :--------------------------- | :---------- |
-| 202 (Accepted)               | The request was accepted by the server, but the Target Workitem state has not necessarily changed yet. |
-| 400 (Bad Request)            | There was a problem with the syntax of the request. |
-| 401 (Unauthorized)           | The client is not authenticated. |
-| 403 (Forbidden)              | The user isn't authorized. |
-| 404 (Not Found)              | The Target Workitem was not found. |
-| 409 (Conflict)               | The request is inconsistent with the current state of the Target Workitem. For example, the Target Workitem is in the SCHEDULED or COMPLETED state. |
-| 415 (Unsupported Media Type) | The provided `Content-Type` is not supported. |
-| 503 (Service Unavailable)    | The service is unavailable or busy. Please try again later. |
+| 202 (Accepted)               | 服务器已接受请求，但目标工作项状态不一定已更改。 |
+| 400 (Bad Request)            | 请求语法有问题。 |
+| 401 (Unauthorized)           | 客户端未经过身份验证。 |
+| 403 (Forbidden)              | 用户未授权。 |
+| 404 (Not Found)              | 找不到目标工作项。 |
+| 409 (Conflict)               | 请求与目标工作项的当前状态不一致。例如，目标工作项处于 SCHEDULED 或 COMPLETED 状态。 |
+| 415 (Unsupported Media Type) | 不支持提供的 `Content-Type`。 |
+| 503 (Service Unavailable)    | 服务不可用或繁忙。请稍后重试。 |
 
-### Request Cancellation Response Payload
+### Request Cancellation 响应有效负载
 
-A success response will have no payload, and a failure response payload will contain a message describing the failure.
-If the Workitem Instance is already in a canceled state, the response will include the following HTTP Warning header:
+成功响应将没有有效负载，失败响应有效负载将包含描述失败的消息。
+如果工作项实例已处于取消状态，响应将包括以下 HTTP 警告标头：
 `299: The UPS is already in the requested state of CANCELED.`
 
 
 ## Retrieve Workitem
 
-This transaction retrieves a Workitem. It corresponds to the UPS DIMSE N-GET operation.
+此事务检索工作项。它对应于 UPS DIMSE N-GET 操作。
 
-Refer: https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.5
+参考：https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.5
 
-If the Workitem exists on the origin server, the Workitem shall be returned in an Acceptable Media Type. The returned Workitem shall not contain the Transaction UID (0008,1195) Attribute. This is necessary to preserve this Attribute's role as an access lock.
+如果工作项存在于源服务器上，工作项应以可接受的媒体类型返回。返回的工作项不应包含事务 UID (0008,1195) 属性。这对于保持此属性作为访问锁的角色是必要的。
 
-| Method  | Path                    | Description   |
+| 方法  | 路径                    | 描述   |
 | :------ | :---------------------- | :------------ |
-| GET     | ../workitems/{workitem}	| Request to retrieve a Workitem	|
+| GET     | ../workitems/{workitem}	| 请求检索工作项	|
 
-The `Accept` header is required, and must have the value `application/dicom+json`.
+需要 `Accept` 标头，并且必须具有值 `application/dicom+json`。
 
-### Retrieve Workitem Response Status Codes
+### Retrieve Workitem 响应状态代码
 
-| Code                         	| Description |
+| 代码                         	| 描述 |
 | :---------------------------- | :---------- |
-| 200 (OK)               		| Workitem Instance was successfully retrieved. |
-| 400 (Bad Request)            	| There was a problem with the request.	|
-| 401 (Unauthorized)           	| The client is not authenticated. |
-| 403 (Forbidden)               | The user isn't authorized. |
-| 404 (Not Found)              	| The Target Workitem was not found. |
-| 503 (Service Unavailable)     | The service is unavailable or busy. Please try again later. |
+| 200 (OK)               		| 工作项实例已成功检索。 |
+| 400 (Bad Request)            	| 请求有问题。	|
+| 401 (Unauthorized)           	| 客户端未经过身份验证。 |
+| 403 (Forbidden)               | 用户未授权。 |
+| 404 (Not Found)              	| 找不到目标工作项。 |
+| 503 (Service Unavailable)     | 服务不可用或繁忙。请稍后重试。 |
 
-### Retrieve Workitem Response Payload
+### Retrieve Workitem 响应有效负载
 
-* A success response has a single part payload containing the requested Workitem in the Selected Media Type.
-* The returned Workitem shall not contain the Transaction UID (0008,1195) Attribute of the Workitem, since that should only be known to the Owner.
+* 成功响应具有包含所选媒体类型中请求的工作项的单部分有效负载。
+* 返回的工作项不应包含工作项的事务 UID (0008,1195) 属性，因为该属性应该只有所有者知道。
 
 ## Update Workitem
 
-This transaction modifies attributes of an existing Workitem. It corresponds to the UPS DIMSE N-SET operation.
+此事务修改现有工作项的属性。它对应于 UPS DIMSE N-SET 操作。
 
-Refer: https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.6
+参考：https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.6
 
-To update a Workitem currently in the SCHEDULED state, the Transaction UID Attribute shall not be present. For a Workitem in the IN PROGRESS state, the request must include the current Transaction UID as a query parameter. If the Workitem is already in the COMPLETED or CANCELED states, the response will be 400 (Bad Request).
+要更新当前处于 SCHEDULED 状态的工作项，不应存在事务 UID 属性。对于处于 IN PROGRESS 状态的工作项，请求必须将当前事务 UID 作为查询参数包含。如果工作项已处于 COMPLETED 或 CANCELED 状态，响应将为 400（错误请求）。
 
-| Method  | Path                            | Description           |
+| 方法  | 路径                            | 描述           |
 | :------ | :------------------------------ | :-------------------- |
-| POST     | ../workitems/{workitem}?{transaction-uid}	| Update Workitem Transaction	|
+| POST     | ../workitems/{workitem}?{transaction-uid}	| 更新工作项事务	|
 
-The `Content-Type` header is required, and must have the value `application/dicom+json`.
+需要 `Content-Type` 标头，并且必须具有值 `application/dicom+json`。
 
-The request payload contains a dataset with the changes to be applied to the target Workitem. When modifying a sequence, the request must include all Items in the sequence, not just the Items to be modified.
-When multiple Attributes need updating as a group, do this as multiple Attributes in a single request, not as multiple requests.
+请求有效负载包含要应用于目标工作项的更改的数据集。修改序列时，请求必须包括序列中的所有项，而不仅仅是要修改的项。
+当需要将多个属性作为一组更新时，请在单个请求中作为多个属性执行此操作，而不是作为多个请求。
 
-There are a number of requirements related to DICOM data attributes in the context of a specific transaction. Attributes may be
-required to be present, required to not be present, required to be empty, or required to not be empty. These requirements can be
-found in [this table](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3).
+在特定事务的上下文中，有许多与 DICOM 数据属性相关的要求。属性可能被要求存在、要求不存在、要求为空或要求不为空。这些要求可以在[此表](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3)中找到。
 
-Notes on dataset attributes:
-- **Conditional requirement codes:** All the conditional requirement codes including 1C and 2C are treated as optional.
+关于数据集属性的说明：
+- **条件要求代码：** 包括 1C 和 2C 在内的所有条件要求代码都被视为可选。
 
-The request cannot set the value of the Procedure Step State (0074,1000) Attribute. Procedure Step State is managed using the Change State transaction, or the Request Cancellation transaction.
+请求无法设置过程步骤状态 (0074,1000) 属性的值。过程步骤状态使用更改状态事务或请求取消事务进行管理。
 
-### Update Workitem Transaction Response Status Codes
-| Code                         	| Description |
+### Update Workitem Transaction 响应状态代码
+| 代码                         	| 描述 |
 | :---------------------------- | :---------- |
-| 200 (OK)               		| The Target Workitem was updated. |
-| 400 (Bad Request)            	| There was a problem with the request. For example: (1) the Target Workitem was in the COMPLETED or CANCELED state. (2) the Transaction UID is missing. (3) the Transaction UID is incorrect. (4) the dataset did not conform to the requirements.
-| 401 (Unauthorized)           	| The client is not authenticated. |
-| 403 (Forbidden)              | The user isn't authorized. |
-| 404 (Not Found)              	| The Target Workitem was not found. |
-| 409 (Conflict)              	| The request is inconsistent with the current state of the Target Workitem. |
-| 415 (Unsupported Media Type) | The provided `Content-Type` is not supported. |
-| 503 (Service Unavailable)    | The service is unavailable or busy. Please try again later. |
+| 200 (OK)               		| 目标工作项已更新。 |
+| 400 (Bad Request)            	| 请求有问题。例如：(1) 目标工作项处于 COMPLETED 或 CANCELED 状态。(2) 缺少事务 UID。(3) 事务 UID 不正确。(4) 数据集不符合要求。
+| 401 (Unauthorized)           	| 客户端未经过身份验证。 |
+| 403 (Forbidden)              | 用户未授权。 |
+| 404 (Not Found)              	| 找不到目标工作项。 |
+| 409 (Conflict)              	| 请求与目标工作项的当前状态不一致。 |
+| 415 (Unsupported Media Type) | 不支持提供的 `Content-Type`。 |
+| 503 (Service Unavailable)    | 服务不可用或繁忙。请稍后重试。 |
 
-### Update Workitem Transaction Response Payload
-The origin server shall support header fields as required in [Table 11.6.3-2](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_11.6.3-2).
+### Update Workitem Transaction 响应有效负载
+源服务器应支持[表 11.6.3-2](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#table_11.6.3-2) 中要求的标头字段。
 
-A success response shall have either no payload, or a payload containing a Status Report document.
+成功响应应没有有效负载，或包含状态报告文档的有效负载。
 
-A failure response payload may contain a Status Report describing any failures, warnings, or other useful information.
+失败响应有效负载可能包含描述任何失败、警告或其他有用信息的状态报告。
 
 ## Change Workitem State
 
-This transaction is used to change the state of a Workitem. It corresponds to the UPS DIMSE N-ACTION operation "Change UPS State". State changes are used to claim ownership, complete, or cancel a Workitem.
+此事务用于更改工作项的状态。它对应于 UPS DIMSE N-ACTION 操作“更改 UPS 状态”。状态更改用于声明所有权、完成或取消工作项。
 
-Refer: https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.7
+参考：https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.7
 
-If the Workitem exists on the origin server, the Workitem shall be returned in an Acceptable Media Type. The returned Workitem shall not contain the Transaction UID (0008,1195) Attribute. This is necessary to preserve this Attribute's role as an access lock as described [here.](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#sect_CC.1.1)
+如果工作项存在于源服务器上，工作项应以可接受的媒体类型返回。返回的工作项不应包含事务 UID (0008,1195) 属性。这对于保持此属性作为访问锁的角色是必要的，如[此处](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#sect_CC.1.1)所述。
 
-| Method  | Path                            | Description           |
+| 方法  | 路径                            | 描述           |
 | :------ | :------------------------------ | :-------------------- |
-| PUT     | ../workitems/{workitem}/state	| Change Workitem State	|
+| PUT     | ../workitems/{workitem}/state	| 更改工作项状态	|
 
-The `Accept` header is required, and must have the value `application/dicom+json`.
+需要 `Accept` 标头，并且必须具有值 `application/dicom+json`。
 
-The request payload shall contain the Change UPS State Data Elements. These data elements are:
+请求有效负载应包含更改 UPS 状态数据元素。这些数据元素是：
 
-* **Transaction UID (0008,1195)**
-The request payload shall include a Transaction UID. The user agent creates the Transaction UID when requesting a transition to the IN PROGRESS state for a given Workitem. The user agent provides that Transaction UID in subsequent transactions with that Workitem.
+* **事务 UID (0008,1195)**  
+请求有效负载应包含事务 UID。用户代理在请求将给定工作项转换到 IN PROGRESS 状态时创建事务 UID。用户代理在该工作项的后续事务中提供该事务 UID。
 
-* **Procedure Step State (0074,1000)**
-The legal values correspond to the requested state transition. They are: "IN PROGRESS", "COMPLETED", or "CANCELED".
+* **过程步骤状态 (0074,1000)**  
+合法值对应于请求的状态转换。它们是：“IN PROGRESS”、“COMPLETED” 或 “CANCELED”。
 
 
-### Change Workitem State Response Status Codes
+### Change Workitem State 响应状态代码
 
-| Code                         	| Description |
+| 代码                         	| 描述 |
 | :---------------------------- | :---------- |
-| 200 (OK)               		| Workitem Instance was successfully retrieved. |
-| 400 (Bad Request)            	| The request cannot be performed for one of the following reasons: (1) the request is invalid given the current state of the Target Workitem. (2) the Transaction UID is missing. (3) the Transaction UID is incorrect
-| 401 (Unauthorized)           	| The client is not authenticated. |
-| 403 (Forbidden)               | The user isn't authorized. |
-| 404 (Not Found)              	| The Target Workitem was not found. |
-| 409 (Conflict)              	| The request is inconsistent with the current state of the Target Workitem. |
-| 503 (Service Unavailable)     | The service is unavailable or busy. Please try again later. |
+| 200 (OK)               		| 工作项实例已成功检索。 |
+| 400 (Bad Request)            	| 由于以下原因之一无法执行请求：(1) 考虑到目标工作项的当前状态，请求无效。(2) 缺少事务 UID。(3) 事务 UID 不正确 |
+| 401 (Unauthorized)           	| 客户端未经过身份验证。 |
+| 403 (Forbidden)               | 用户未授权。 |
+| 404 (Not Found)              	| 找不到目标工作项。 |
+| 409 (Conflict)              	| 请求与目标工作项的当前状态不一致。 |
+| 503 (Service Unavailable)     | 服务不可用或繁忙。请稍后重试。 |
 
-### Change Workitem State Response Payload
+### Change Workitem State 响应有效负载
 
-* Responses will include the header fields specified in [section 11.7.3.2](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.7.3.2)
-* A success response shall have no payload.
-* A failure response payload may contain a Status Report describing any failures, warnings, or other useful information.
+* 响应将包括[第 11.7.3.2 节](https://dicom.nema.org/medical/dicom/current/output/html/part18.html#sect_11.7.3.2)中指定的标头字段
+* 成功响应应没有有效负载。
+* 失败响应有效负载可能包含描述任何失败、警告或其他有用信息的状态报告。
 
 ## Search Workitems
 
-This transaction enables you to search for Workitems by attributes.
+此事务使您能够按属性搜索工作项。
 
-| Method | Path                                            | Description                       |
+| 方法 | 路径                                            | 描述 |
 | :----- | :---------------------------------------------- | :-------------------------------- |
-| GET    | ../workitems?                                   | Search for Workitems              |
+| GET    | ../workitems?                                   | 搜索工作项 |
 
-The following `Accept` header(s) are supported for searching:
+支持以下 `Accept` 标头用于搜索：
 
 - `application/dicom+json`
 
-### Supported Search Parameters
+### 支持的搜索参数
 
-The following parameters for each query are supported:
+每个查询支持以下参数：
 
-| Key              | Support Value(s)              | Allowed Count | Description |
+| 键              | 支持的值              | 允许计数 | 描述 |
 | :--------------- | :---------------------------- | :------------ | :---------- |
-| `{attributeID}=` | {value}                       | 0...N         | Search for attribute/ value matching in query. |
-| `includefield=`  | `{attributeID}`<br/>`all`   | 0...N         | The additional attributes to return in the response. Only top-level attributes can be specified to be included - not attributes that are part of sequences. Both public and private tags are supported. <br/>When `all` is provided, please see [Search Response](###Search-Response) for more information about which attributes will be returned for each query type.<br/>If a mixture of {attributeID} and 'all' is provided, the server will default to using 'all'. |
-| `limit=`         | {value}                       | 0...1          | Integer value to limit the number of values returned in the response.<br/>Value can be between the range 1 >= x <= 200. Defaulted to 100. |
-| `offset=`        | {value}                       | 0...1          | Skip {value} results.<br/>If an offset is provided larger than the number of search query results, a 204 (no content) response will be returned. |
-| `fuzzymatching=` | `true` \| `false`             | 0...1          | If true fuzzy matching is applied to any attributes with the Person Name (PN) Value Representation (VR). It will do a prefix word match of any name part inside these attributes. For example, if PatientName is "John^Doe", then "joh", "do", "jo do", "Doe" and "John Doe" will all match. However "ohn" will not match. |
+| `{attributeID}=` | {value}                       | 0...N         | 在查询中搜索属性/值匹配。 |
+| `includefield=`  | `{attributeID}`<br/>`all`   | 0...N         | 响应中要返回的附加属性。只能指定要包含的顶级属性，不能是序列中包含的属性。支持公共和私有标签。<br/>当提供 `all` 时，请参阅[搜索响应](###Search-Response)以了解每个查询类型将返回哪些属性的更多信息。<br/>如果混合提供 {attributeID} 和 'all'，服务器将默认使用 'all'。 |
+| `limit=`         | {value}                       | 0...1          | 限制响应中返回值数量的整数值。范围 1-200，默认 100。 |
+| `offset=`        | {value}                       | 0...1          | 跳过 {value} 个结果。如果偏移量大于搜索结果数量，将返回 204（无内容）。 |
+| `fuzzymatching=` | `true` \| `false`             | 0...1          | 如果为 true，则对具有人员姓名 (PN) VR 的属性应用模糊匹配。对名称部分执行前缀匹配。例如 PatientName 为 \"John^Doe\" 时，\"joh\"、\"do\"、\"jo do\"、\"Doe\"、\"John Doe\" 都匹配，\"ohn\" 不匹配。 |
 
-#### Searchable Attributes
+#### 可搜索属性
 
-We support searching on these attributes:
+支持在这些属性上进行搜索：
 
-| Attribute Keyword |
+| 属性关键字 |
 | :---------------- |
 | PatientName |
 | PatientID |
@@ -879,58 +865,58 @@ We support searching on these attributes:
 | ProcedureStepState |
 | StudyInstanceUID |
 
-> Note: We do not support searching using empty string for any attributes. 
+> 注意：不支持对任何属性使用空字符串搜索。
 
-#### Search Matching
+#### 搜索匹配
 
-We support these matching types:
+支持这些匹配类型：
 
-| Search Type | Supported Attribute | Example |
+| 搜索类型 | 支持的属性 | 示例 |
 | :---------- | :------------------ | :------ |
-| Range Query | Scheduled​Procedure​Step​Start​Date​Time | {attributeID}={value1}-{value2}. For date/ time values, we support an inclusive range on the tag. This will be mapped to `attributeID >= {value1} AND attributeID <= {value2}`. If {value1} is not specified, all occurrences of dates/times prior to and including {value2} will be matched. Likewise, if {value2} is not specified, all occurrences of {value1} and subsequent dates/times will be matched. However, one of these values has to be present. `{attributeID}={value1}-` and `{attributeID}=-{value2}` are valid, however, `{attributeID}=-` is invalid. |
-| Exact Match | All supported attributes | {attributeID}={value1} |
-| Fuzzy Match | PatientName | Matches any component of the name which starts with the value. |
+| 范围查询 | Scheduled​Procedure​Step​Start​Date​Time | {attributeID}={value1}-{value2}。对于日期/时间值，支持标签上的包含范围，映射为 `attributeID >= {value1} AND attributeID <= {value2}`。`{attributeID}={value1}-` 与 `{attributeID}=-{value2}` 有效，`{attributeID}=-` 无效。 |
+| 精确匹配 | 所有支持的属性 | {attributeID}={value1} |
+| 模糊匹配 | PatientName | 匹配以该值开头的名称的任何组件。 |
 
-> Note: While we do not support full sequence matching, we do support exact match on the attributes listed above that are contained in a sequence.
+> 注意：虽然不支持完整序列匹配，但支持对上述列出的序列内属性进行精确匹配。
 
-#### Attribute ID
+#### 属性 ID
 
-Tags can be encoded in a number of ways for the query parameter. We have partially implemented the standard as defined in [PS3.18 6.7.1.1.1](http://dicom.nema.org/medical/dicom/2019a/output/chtml/part18/sect_6.7.html#sect_6.7.1.1.1). The following encodings for a tag are supported:
+标签可以通过多种方式编码为查询参数。我们部分实现了 [PS3.18 6.7.1.1.1](http://dicom.nema.org/medical/dicom/2019a/output/chtml/part18/sect_6.7.html#sect_6.7.1.1.1) 中定义的标准。支持以下标签编码：
 
-| Value            | Example          |
+| 值            | 示例          |
 | :--------------- | :--------------- |
 | {group}{element} | 00100010         |
 | {dicomKeyword}   | PatientName |
 
-Example query: **../workitems?PatientID=K123&0040A370.00080050=1423JS&includefield=00404005&limit=5&offset=0**
+示例查询：**../workitems?PatientID=K123&0040A370.00080050=1423JS&includefield=00404005&limit=5&offset=0**
 
-### Search Response
+### 搜索响应
 
-The response will be an array of 0...N DICOM datasets. The following attributes are returned:
+响应将是 0...N 个 DICOM 数据集的数组。返回以下属性：
 
- - All attributes in [DICOM PS 3.4 Table CC.2.5-3](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3) with a Return Key Type of 1 or 2.
- - All attributes in [DICOM PS 3.4 Table CC.2.5-3](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3) with a Return Key Type of 1C for which the conditional requirements are met.
- - All other Workitem attributes passed as match parameters.
- - All other Workitem attributes passed as includefield parameter values.
+ - [DICOM PS 3.4 表 CC.2.5-3](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3) 中返回键类型为 1 或 2 的所有属性。
+ - [DICOM PS 3.4 表 CC.2.5-3](https://dicom.nema.org/medical/dicom/current/output/html/part04.html#table_CC.2.5-3) 中返回键类型为 1C 且满足条件要求的所有属性。
+ - 作为匹配参数传递的所有其他工作项属性。
+ - 作为 includefield 参数值传递的所有其他工作项属性。
 
-### Search Response Codes
+### 搜索响应代码
 
-The query API will return one of the following status codes in the response:
+查询 API 将在响应中返回以下状态代码之一：
 
-| Code                      | Description |
+| 代码                      | 描述 |
 | :------------------------ | :---------- |
-| 200 (OK)                  | The response payload contains all the matching resource. |
-| 206 (Partial Content)     | The response payload contains only some of the search results, and the rest can be requested through the appropriate request. |
-| 204 (No Content)          | The search completed successfully but returned no results. |
-| 400 (Bad Request)         | The was a problem with the request. For example, invalid Query Parameter syntax. Response body contains details of the failure. |
-| 401 (Unauthorized)        | The client is not authenticated. |
-| 403 (Forbidden)              | The user isn't authorized. |
-| 503 (Service Unavailable) | The service is unavailable or busy. Please try again later. |
+| 200 (OK)                  | 响应有效负载包含所有匹配的资源。 |
+| 206 (Partial Content)     | 响应有效负载仅包含部分搜索结果，其余可以通过后续请求获取。 |
+| 204 (No Content)          | 搜索成功但无结果。 |
+| 400 (Bad Request)         | 请求有问题（例如查询参数语法无效）。响应体包含失败详情。 |
+| 401 (Unauthorized)        | 客户端未经过身份验证。 |
+| 403 (Forbidden)              | 用户未授权。 |
+| 503 (Service Unavailable) | 服务不可用或繁忙。请稍后重试。 |
 
-### Additional Notes
+### 附加说明
 
-- The query API will not return 413 (request entity too large). If the requested query response limit is outside of the acceptable range, a bad request will be returned. Anything requested within the acceptable range, will be resolved.
-- Paged results are optimized to return matched *newest* instance first, this may result in duplicate records in subsequent pages if newer data matching the query was added.
-- Matching is case insensitive and accent insensitive for PN VR types.
-- Matching is case insensitive and accent sensitive for other string VR types.
-- If there is a scenario where canceling a Workitem and querying the same happens at the same time, then the query will most likely exclude the Workitem that is getting updated and the response code will be 206 (Partial Content).
+- 查询 API 不会返回 413（请求实体太大）。如果请求的查询响应限制超出可接受范围，将返回错误请求。在可接受范围内请求的任何内容都将被解析。
+- 分页结果经过优化，首先返回匹配的*最新*实例，如果添加了匹配查询的新数据，这可能导致后续页面中出现重复记录。
+- 对于 PN VR 类型，匹配不区分大小写且不区分重音。
+- 对于其他字符串 VR 类型，匹配不区分大小写但区分重音。
+- 如果同时发生取消工作项和查询同一工作项，则查询很可能会排除正在更新的工作项，响应代码将为 206（部分内容）。

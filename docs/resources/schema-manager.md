@@ -1,85 +1,85 @@
 # DICOM Schema Manager
 
-### What is it?
-Schema Manager is a command line app that upgrades the schema in your database from one version to the next through migration scripts.
+### 它是什么？
+Schema Manager 是一个命令行应用程序，通过迁移脚本将数据库中的架构从一个版本升级到下一个版本。
 
 ------------
 
-### How do you use it?
-DICOM Schema Manager currently has one command (**apply**) with the following options:
+### 如何使用它？
+DICOM Schema Manager 目前有一个命令（**apply**），具有以下选项：
 
-| Option | Description |
+| 选项 | 描述 |
 | ------------ | ------------ |
-| `-cs, --connection-string` | The connection string of the SQL server to apply the schema update. (REQUIRED) |
-| `-mici, --managed-identity-client-id` | The client ID of the managed identity to be used. |
-| `-at, --authentication-type` | The authentication type to use. Valid values are `ManagedIdentity` and `ConnectionString`. |
-| `-v, --version` | Applies all available versions from the current database version to the specified version. |
-| `-n, --next` | Applies the next available database version. |
-| `-l, --latest` | Applies all available versions from the current database version to the latest. |
-| `-f, --force` | The schema migration is run without validating the specified version. |
-| `-?, -h, --help` | Show help and usage information. |
+| `-cs, --connection-string` | 要应用架构更新的 SQL 服务器的连接字符串。（必需） |
+| `-mici, --managed-identity-client-id` | 要使用的托管标识的客户端 ID。 |
+| `-at, --authentication-type` | 要使用的身份验证类型。有效值为 `ManagedIdentity` 和 `ConnectionString`。 |
+| `-v, --version` | 从当前数据库版本到指定版本应用所有可用版本。 |
+| `-n, --next` | 应用下一个可用数据库版本。 |
+| `-l, --latest` | 从当前数据库版本到最新版本应用所有可用版本。 |
+| `-f, --force` | 在不验证指定版本的情况下运行架构迁移。 |
+| `-?, -h, --help` | 显示帮助和使用信息。 |
 
-You can view the most up-to-date options by running the following command:
+您可以通过运行以下命令查看最新的选项：
 `.\Microsoft.Health.Dicom.SchemaManager.Console.exe apply -?`
 
-Example command line usage:
+示例命令行用法：
 `.\Microsoft.Health.Dicom.SchemaManager.Console.exe apply --connection-string "server=(local);Initial Catalog=DICOM;TrustServerCertificate=True;Integrated Security=True" --version 20`
 
 `.\Microsoft.Health.Dicom.SchemaManager.Console.exe apply -cs "server=(local);Initial Catalog=DICOM;TrustServerCertificate=True;Integrated Security=True" --latest`
 
 ------------
 
-### Important Database Tables
+### 重要数据库表
 
 **SchemaVersion**
-- This table holds all schema versions that have been applied to the database.
+- 此表保存已应用于数据库的所有架构版本。
 
 **InstanceSchema**
-- Each DICOM instance reports the schema version it is at, as well as the versions it is compatible with, to the InstanceSchema database table.
+- 每个 DICOM 实例将其架构版本以及它兼容的版本报告给 InstanceSchema 数据库表。
 
 ------------
 
-### Terminology
+### 术语
 
-**Current database version**
-- The maximum SchemaVersion version in the database.
+**当前数据库版本**
+- 数据库中的最大 SchemaVersion 版本。
 
-**Current instance version**
-- The maximum SchemaVersion version in the database that falls at or below the SchemaVersionConstants.Max value. For example, if the current database version is 25, but SchemaVersionConstants.Max is 23, the instance's current version will be 23.
+**当前实例版本**
+- 数据库中等于或小于 SchemaVersionConstants.Max 值的最大 SchemaVersion 版本。例如，如果当前数据库版本是 25，但 SchemaVersionConstants.Max 是 23，则实例的当前版本将是 23。
 
-**Available version**
-- Any version greater than the current database version.
+**可用版本**
+- 任何大于当前数据库版本的版本。
 
-**Compatible version**
-- Any version from SchemaVersionConstants.Min to SchemaVersionConstants.Max (inclusive).
-
-------------
-
-### How does it work?
-
-Schema Manager runs through the following steps:
-1. Verifies all arguments are supplied and valid.
-2. Calls the [healthcare-shared-components ApplySchema function](https://github.com/microsoft/healthcare-shared-components/blob/main/src/Microsoft.Health.SqlServer/Features/Schema/Manager/SqlSchemaManager.cs#L53), which:
-	1. Ensures the base schema exists.
-	2. Ensures instance schema records exist.
-		1. Since DICOM Server implements its own ISchemaClient (DicomSchemaClient), if there are no instance schema records, the upgrade continues uninterrupted. In healthcare-shared-components, this would throw an exception and cancel the upgrade.
-	3. Gets all available versions and compares them against all compatible versions.
-	4. Based on the current database schema version:
-		1. If there is no version (base schema only), the latest full migration script is applied.
-		2. If the current version is >= 1, each available version is applied one at a time until the database's schema version reaches the desired version input by the user (latest, next, or a specific version).
+**兼容版本**
+- 从 SchemaVersionConstants.Min 到 SchemaVersionConstants.Max（含）的任何版本。
 
 ------------
 
-### Caveats
+### 它是如何工作的？
 
-Schema Manager works under the assumption that it will be updated at the same time as any DICOM binaries. It's possible to end up with a database in a bad state when running Schema Manager with a different tag version than the DICOM binary. For example, you could have a database upgraded to schema version 25, but the binary only supports up to schema version 23.
-
-Schema Manager is programmed to upgrade the database of an existing, running DICOM instance, or against a new database. If SchemaManager is run against an existing database with no running instances, SchemaManager will apply the latest SchemaVersion possible, and not take into account the compatibility from running instances. This is because the InstanceSchema table is only populated when DICOM services are running.
+Schema Manager 执行以下步骤：
+1. 验证所有参数都已提供且有效。
+2. 调用 [healthcare-shared-components ApplySchema 函数](https://github.com/microsoft/healthcare-shared-components/blob/main/src/Microsoft.Health.SqlServer/Features/Schema/Manager/SqlSchemaManager.cs#L53)，该函数：
+	1. 确保基础架构存在。
+	2. 确保实例架构记录存在。
+		1. 由于 DICOM 服务器实现了自己的 ISchemaClient (DicomSchemaClient)，如果没有实例架构记录，升级将继续进行而不会中断。在 healthcare-shared-components 中，这将抛出异常并取消升级。
+	3. 获取所有可用版本并将它们与所有兼容版本进行比较。
+	4. 基于当前数据库架构版本：
+		1. 如果没有版本（仅基础架构），则应用最新的完整迁移脚本。
+		2. 如果当前版本 >= 1，则一次应用一个可用版本，直到数据库的架构版本达到用户输入的所需版本（最新、下一个或特定版本）。
 
 ------------
 
-### SQL Script Locations
+### 注意事项
 
-- [Base Schema Script](https://github.com/microsoft/healthcare-shared-components/blob/main/src/Microsoft.Health.SqlServer/Features/Schema/Migrations/BaseSchema.sql)
+Schema Manager 在假设它将与任何 DICOM 二进制文件同时更新的情况下工作。当使用与 DICOM 二进制文件不同的标记版本运行 Schema Manager 时，可能会使数据库处于不良状态。例如，您可能有一个升级到架构版本 25 的数据库，但二进制文件仅支持到架构版本 23。
 
-- [DICOM Migration Scripts](https://github.com/microsoft/dicom-server/tree/main/src/Microsoft.Health.Dicom.SqlServer/Features/Schema/Migrations)
+Schema Manager 被编程为升级现有、正在运行的 DICOM 实例的数据库，或针对新数据库。如果 SchemaManager 针对没有运行实例的现有数据库运行，SchemaManager 将应用最新的 SchemaVersion，而不考虑运行实例的兼容性。这是因为 InstanceSchema 表仅在 DICOM 服务运行时填充。
+
+------------
+
+### SQL 脚本位置
+
+- [基础架构脚本](https://github.com/microsoft/healthcare-shared-components/blob/main/src/Microsoft.Health.SqlServer/Features/Schema/Migrations/BaseSchema.sql)
+
+- [DICOM 迁移脚本](https://github.com/microsoft/dicom-server/tree/main/src/Microsoft.Health.Dicom.SqlServer/Features/Schema/Migrations)

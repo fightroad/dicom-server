@@ -1,8 +1,8 @@
-## Description
-Describe the changes in this PR.
+## 描述
+简要说明本 PR 的变更内容。
 
-## Related issues
-Addresses [issue #].
+## 关联 Issue
+关联 [issue #]。
 
-## Testing
-Describe how this change was tested.
+## 测试
+说明本次变更的测试方式与结果。

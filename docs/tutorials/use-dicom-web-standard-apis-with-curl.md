@@ -1,60 +1,60 @@
-# Use DICOMWeb&trade; Standard APIs with cURL
+# 使用 cURL 的 DICOMWeb&trade; 标准 API
 
-This tutorial uses cURL to demonstrate working with the Medical Imaging Server for DICOM.
+本教程使用 cURL 演示如何使用 Medical Imaging Server for DICOM。
 
-For the tutorial we will use the DICOM files here: [Sample DICOM files](../dcms). The file name, studyUID, seriesUID and instanceUID of the sample DICOM files is as follows:
+在本教程中，我们将使用这里的 DICOM 文件：[示例 DICOM 文件](../dcms)。示例 DICOM 文件的文件名、studyUID、seriesUID 和 instanceUID 如下：
 
-| File | StudyUID | SeriesUID | InstanceUID |
+| 文件 | StudyUID | SeriesUID | InstanceUID |
 | --- | --- | --- | ---|
 |green-square.dcm|1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420|1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652|1.2.826.0.1.3680043.8.498.12714725698140337137334606354172323212|
 |red-triangle.dcm|1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420|1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652|1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395|
 |blue-circle.dcm|1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420|1.2.826.0.1.3680043.8.498.77033797676425927098669402985243398207|1.2.826.0.1.3680043.8.498.13273713909719068980354078852867170114|
 
-> NOTE: Each of these files represent a single instance and are part of the same study. Also green-square and red-triangle are part of the same series, while blue-circle is in a separate series.
+> 注意：这些文件中的每一个都代表一个实例，并且是同一研究的一部分。此外，green-square 和 red-triangle 是同一序列的一部分，而 blue-circle 在单独的序列中。
 
-## Prerequisites
+## 先决条件
 
-In order to use the DICOMWeb&trade; Standard APIs, you must have an instance of the Medical Imaging Server for DICOM deployed. If you have not already deployed the Medical Imaging Server, [Deploy the Medical Imaging Server to Azure](../quickstarts/deploy-via-azure.md).
+为了使用 DICOMWeb&trade; 标准 API，您必须部署 Medical Imaging Server for DICOM 的实例。如果您尚未部署 Medical Imaging Server，请[将 Medical Imaging Server 部署到 Azure](../quickstarts/deploy-via-azure.md)。
 
-Once you have deployed an instance of the Medical Imaging Server for DICOM, retrieve the URL for your App Service:
+部署 Medical Imaging Server for DICOM 实例后，检索 App Service 的 URL：
 
-1. Sign into the [Azure Portal](https://portal.azure.com/).
-1. Search for **App Services** and select your Medical Imaging Server for DICOM App Service.
-1. Copy the **URL** of your App Service.
-1. Append the version you would like to use to the end of your app service (ex. `https://<app_service_url>/v<version>/`) and use this as the base url for your DICOM service in all the following examples. For more information on versioning visit the [Api Versioning Documentation](../api-versioning.md).
+1. 登录 [Azure 门户](https://portal.azure.com/)。
+2. 搜索 **App Services** 并选择您的 Medical Imaging Server for DICOM App Service。
+3. 复制 App Service 的 **URL**。
+4. 将您要使用的版本附加到应用服务的末尾（例如 `https://<app_service_url>/v<version>/`），并在以下所有示例中将其用作 DICOM 服务的基础 URL。有关版本控制的更多信息，请访问 [API 版本控制文档](../api-versioning.md)。
 
-For this code, we'll be accessing an unsecured dev/test service. Please don't upload any private health information (PHI).
+对于此代码，我们将访问不安全的开发/测试服务。请不要上传任何私人健康信息 (PHI)。
 
+## 使用 Medical Imaging Server for DICOM
 
-## Working with the Medical Imaging Server for DICOM 
-The DICOMweb&trade; standard makes heavy use of `multipart/related` HTTP requests combined with DICOM specific accept headers. Developers familiar with other REST-based APIs often find working with the DICOMweb&trade; standard awkward. However, once you have it up and running, it's easy to use. It just takes a little finagling to get started.
+DICOMweb&trade; 标准大量使用 `multipart/related` HTTP 请求结合 DICOM 特定的 accept 标头。熟悉其他基于 REST 的 API 的开发人员通常发现使用 DICOMweb&trade; 标准很麻烦。但是，一旦启动并运行，它很容易使用。刚开始需要一点技巧。
 
-The cURL commands each contain at least one, and sometimes two, variables that much be replaced. To simplify running the commands, do a search and replace for the following variables, replacing them with your specific values:
+每个 cURL 命令都包含至少一个，有时两个必须替换的变量。为了简化命令的运行，请对以下变量进行搜索和替换，将它们替换为您的特定值：
 
-* {base-url} : this is the url your created in the steps of above including the service url and version.
-* {path-to-dicoms} : path to the directory which contains the red-triangle.dcm file, such as `C:/dicom-server/docs/dcms`
-    * Be sure to use forward slashes as separators and end the directory _without_ a trailing forward slash.     
+* {base-url} : 这是您在上面步骤中创建的 URL，包括服务 URL 和版本。
+* {path-to-dicoms} : 包含 red-triangle.dcm 文件的目录路径，例如 `C:/dicom-server/docs/dcms`
+    * 确保使用正斜杠作为分隔符，并且目录末尾*没有*尾随正斜杠。     
 
 ---
-## Uploading DICOM Instances (STOW)
+## 上传 DICOM 实例 (STOW)
 ---
-### Store-instances-using-multipart/related
+### 使用 multipart/related 存储实例
 
-This request intends to demonstrate how to upload DICOM files using multipart/related. 
+此请求旨在演示如何使用 multipart/related 上传 DICOM 文件。
 
-> NOTE: The Medical Imaging Server for DICOM is more lenient than the DICOM standard. The example below, however, demonstrates a POST request that complies tightly to the standard.
+> 注意：Medical Imaging Server for DICOM 比 DICOM 标准更宽松。但是，下面的示例演示了严格符合标准的 POST 请求。
 
-_Details:_
+_详细信息：_
 
-* Path: ../studies
-* Method: POST
-* Headers:
+* 路径：../studies
+* 方法：POST
+* 标头：
     * `Accept: application/dicom+json`
     * `Content-Type: multipart/related; type="application/dicom"`
-* Body:
-    * `Content-Type: application/dicom` for each file uploaded, separated by a boundary value
+* 正文：
+    * 每个上传文件的 `Content-Type: application/dicom`，由边界值分隔
 
-> Some programming languages and tools behave differently. For instance, some require you to define your own boundary. For those, you may need to use a slightly modified Content-Type header. The following have been used successfully.
+> 某些编程语言和工具的行为不同。例如，有些要求您定义自己的边界。对于这些，您可能需要使用稍微修改的 Content-Type 标头。以下已成功使用。
  > * `Content-Type: multipart/related; type="application/dicom"; boundary=ABCD1234`
  > * `Content-Type: multipart/related; boundary=ABCD1234`
  > * `Content-Type: multipart/related`
@@ -63,20 +63,20 @@ _Details:_
 
 ---
 
-### Store-instances-for-a-specific-study
+### 为特定研究存储实例
 
-This request demonstrates how to upload DICOM files using multipart/related to a designated study. 
+此请求演示如何使用 multipart/related 将 DICOM 文件上传到指定的研究。
 
-_Details:_
-* Path: ../studies/{study}
-* Method: POST
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}
+* 方法：POST
+* 标头：
     * `Accept: application/dicom+json`
     * `Content-Type: multipart/related; type="application/dicom"`
-* Body:
-    * `Content-Type: application/dicom` for each file uploaded, separated by a boundary value
+* 正文：
+    * 每个上传文件的 `Content-Type: application/dicom`，由边界值分隔
 
-> Some programming languages and tools behave differently. For instance, some require you to define your own boundary. For those, you may need to use a slightly modified Content-Type header. The following have been used successfully.
+> 某些编程语言和工具的行为不同。例如，有些要求您定义自己的边界。对于这些，您可能需要使用稍微修改的 Content-Type 标头。以下已成功使用。
  > * `Content-Type: multipart/related; type="application/dicom"; boundary=ABCD1234`
  > * `Content-Type: multipart/related; boundary=ABCD1234`
  > * `Content-Type: multipart/related`
@@ -85,259 +85,259 @@ _Details:_
 
 ---
 
-### Store-single-instance
+### 存储单个实例
 
-> NOTE: This is a non-standard API that allows the upload of a single DICOM file without the need to configure the POST for multipart/related. Although cURL handles multipart/related well, this API allows tools like Postman to upload files to the Medical Imaging Server for DICOM.
+> 注意：这是一个非标准 API，允许上传单个 DICOM 文件，而无需为 multipart/related 配置 POST。尽管 cURL 可以很好地处理 multipart/related，但此 API 允许 Postman 等工具将文件上传到 Medical Imaging Server for DICOM。
 
-The following is required to upload a single DICOM file.
+以下是上传单个 DICOM 文件所需的。
 
-_Details:_
-* Path: ../studies
-* Method: POST
-* Headers:
+_详细信息：_
+* 路径：../studies
+* 方法：POST
+* 标头：
    *  `Accept: application/dicom+json`
    *  `Content-Type: application/dicom`
-* Body:
-    * Contains a single DICOM file as binary bytes.
+* 正文：
+    * 包含单个 DICOM 文件作为二进制字节。
 
 `curl --location --request POST "{base-url}/studies" --header "Accept: application/dicom+json" --header "Content-Type: application/dicom" --data-binary "@{path-to-dicoms}/green-square.dcm"`
 
 ---
-## Retrieving DICOM (WADO)
+## 检索 DICOM (WADO)
 ---
-### Retrieve-all-instances-within-a-study
+### 检索研究中的所有实例
 
-This request retrieves all instances within a single study, and returns them as a collection of multipart/related bytes.
+此请求检索单个研究中的所有实例，并将它们作为 multipart/related 字节集合返回。
 
-_Details:_
-* Path: ../studies/{study}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}
+* 方法：GET
+* 标头：
    * `Accept: multipart/related; type="application/dicom"; transfer-syntax=*`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420" --header "Accept: multipart/related; type=\"application/dicom\"; transfer-syntax=*" --output "suppressWarnings.txt"`
 
-> This cURL command will show the downloaded bytes in the output file (suppressWarnings.txt), but these are not direct DICOM files, only a text representation of the multipart/related download.
+> 此 cURL 命令将在输出文件 (suppressWarnings.txt) 中显示下载的字节，但这些不是直接的 DICOM 文件，只是 multipart/related 下载的文本表示。
 
 ---
-### Retrieve-metadata-of-all-instances-in-study
+### 检索研究中所有实例的元数据
 
-This request retrieves the metadata for all instances within a single study.
+此请求检索单个研究中所有实例的元数据。
 
-_Details:_
-* Path: ../studies/{study}/metadata
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/metadata
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
-> This cURL command will show the downloaded bytes in the output file (suppressWarnings.txt), but these are not direct DICOM files, only a text representation of the multipart/related download.
+> 此 cURL 命令将在输出文件 (suppressWarnings.txt) 中显示下载的字节，但这些不是直接的 DICOM 文件，只是 multipart/related 下载的文本表示。
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/metadata" --header "Accept: application/dicom+json"`
 
 ---
-### Retrieve-all-instances-within-a-series
+### 检索序列中的所有实例
 
-This request retrieves all instances within a single series, and returns them as a collection of multipart/related bytes.
+此请求检索单个序列中的所有实例，并将它们作为 multipart/related 字节集合返回。
 
-_Details:_
-* Path: ../studies/{study}/series/{series}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/series/{series}
+* 方法：GET
+* 标头：
    * `Accept: multipart/related; type="application/dicom"; transfer-syntax=*`
 
-> This cURL command will show the downloaded bytes in the output file (suppressWarnings.txt), but it is not the DICOM file, only a text representation of the multipart/related download.
+> 此 cURL 命令将在输出文件 (suppressWarnings.txt) 中显示下载的字节，但它不是 DICOM 文件，只是 multipart/related 下载的文本表示。
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652" --header "Accept: multipart/related; type=\"application/dicom\"; transfer-syntax=*" --output "suppressWarnings.txt"`
 
 ---
-### Retrieve-metadata-of-all-instances-within-a-series
+### 检索序列中所有实例的元数据
 
-This request retrieves the metadata for all instances within a single study.
+此请求检索单个研究中所有实例的元数据。
 
-_Details:_
-* Path: ../studies/{study}/series/{series}/metadata
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/series/{series}/metadata
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652/metadata" --header "Accept: application/dicom+json"`
 
 ---
-### Retrieve-a-single-instance-within-a-series-of-a-study
+### 检索研究的序列中的单个实例
 
-This request retrieves a single instance, and returns it as a DICOM formatted stream of bytes.
+此请求检索单个实例，并将其作为 DICOM 格式的字节流返回。
 
-_Details:_
-* Path: ../studies/{study}/series{series}/instances/{instance}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/series{series}/instances/{instance}
+* 方法：GET
+* 标头：
    * `Accept: application/dicom; transfer-syntax=*`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652/instances/1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395" --header "Accept: application/dicom; transfer-syntax=*" --output "suppressWarnings.txt"`
 
 ---
-### Retrieve-metadata-of-a-single-instance-within-a-series-of-a-study
+### 检索研究的序列中的单个实例的元数据
 
-This request retrieves the metadata for a single instances within a single study and series.
+此请求检索单个研究和序列中的单个实例的元数据。
 
-_Details:_
-* Path: ../studies/{study}/series/{series}/instances/{instance}/metadata
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/series/{series}/instances/{instance}/metadata
+* 方法：GET
+* 标头：
   * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652/instances/1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395/metadata" --header "Accept: application/dicom+json"`
 
 ---
-### Retrieve-one-or-more-frames-from-a-single-instance
+### 从单个实例检索一个或多个帧
 
-This request retrieves one or more frames from a single instance, and returns them as a collection of multipart/related bytes. Multiple frames can be retrieved by passing a comma separated list of frame numbers.  All DICOM instances with images have at minimum one frame, which is often just the image associated with the instance itself.
+此请求从单个实例检索一个或多个帧，并将它们作为 multipart/related 字节集合返回。可以通过传递逗号分隔的帧号列表来检索多个帧。所有带有图像的 DICOM 实例至少有一帧，这通常只是与实例本身关联的图像。
 
-_Details:_
-* Path: ../studies/{study}/series{series}/instances/{instance}/frames/1,2,3
-* Method: GET
-* Headers:
-   * `Accept: multipart/related; type="application/octet-stream"; transfer-syntax=1.2.840.10008.1.2.1` (Default) or
-   * `Accept: multipart/related; type="application/octet-stream"; transfer-syntax=*` or
+_详细信息：_
+* 路径：../studies/{study}/series{series}/instances/{instance}/frames/1,2,3
+* 方法：GET
+* 标头：
+   * `Accept: multipart/related; type="application/octet-stream"; transfer-syntax=1.2.840.10008.1.2.1` (默认) 或
+   * `Accept: multipart/related; type="application/octet-stream"; transfer-syntax=*` 或
    * `Accept: multipart/related; type="application/octet-stream";`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652/instances/1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395/frames/1" --header "Accept: multipart/related; type=\"application/octet-stream\"; transfer-syntax=1.2.840.10008.1.2.1" --output "suppressWarnings.txt"`
 
 ---
-## Query DICOM (QIDO)
+## 查询 DICOM (QIDO)
 
-In the following examples, we search for items using their unique identifiers. You can also search for other attributes, such as PatientName.
+在以下示例中，我们使用其唯一标识符搜索项目。您也可以搜索其他属性，例如 PatientName。
 
 ---
-### Search-for-studies
+### 搜索研究
 
-This request enables searches for one or more studies by DICOM attributes.
+此请求支持按 DICOM 属性搜索一个或多个研究。
 
-> Please see the [Conformance.md](../docs/resources/conformance-statement.md) file for supported DICOM attributes.
+> 请参阅 [Conformance.md](../docs/resources/conformance-statement.md) 文件以了解支持的 DICOM 属性。
 
-_Details:_
-* Path: ../studies?StudyInstanceUID={study}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies?StudyInstanceUID={study}
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/studies?StudyInstanceUID=1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420" --header "Accept: application/dicom+json"`
 
 ---
-### Search-for-series
+### 搜索序列
 
-This request enables searches for one or more series by DICOM attributes.
+此请求支持按 DICOM 属性搜索一个或多个序列。
 
-> Please see the [Conformance.md](../docs/resources/conformance-statement.md) file for supported DICOM attributes.
+> 请参阅 [Conformance.md](../docs/resources/conformance-statement.md) 文件以了解支持的 DICOM 属性。
 
-_Details:_
-* Path: ../series?SeriesInstanceUID={series}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../series?SeriesInstanceUID={series}
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/series?SeriesInstanceUID=1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652" --header "Accept: application/dicom+json"`
 
 ---
-### Search-for-series-within-a-study
+### 在研究内搜索序列
 
-This request enables searches for one or more series within a single study by DICOM attributes.
+此请求支持按 DICOM 属性在单个研究内搜索一个或多个序列。
 
-> Please see the [Conformance.md](../docs/resources/conformance-statement.md) file for supported DICOM attributes.
+> 请参阅 [Conformance.md](../docs/resources/conformance-statement.md) 文件以了解支持的 DICOM 属性。
 
-_Details:_
-* Path: ../studies/{study}/series?SeriesInstanceUID={series}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/series?SeriesInstanceUID={series}
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series?SeriesInstanceUID=1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652" --header "Accept: application/dicom+json"`
 
 ---
-### Search-for-instances
+### 搜索实例
 
-This request enables searches for one or more instances by DICOM attributes.
+此请求支持按 DICOM 属性搜索一个或多个实例。
 
-> Please see the [Conformance.md](../docs/resources/conformance-statement.md) file for supported DICOM attributes.
+> 请参阅 [Conformance.md](../docs/resources/conformance-statement.md) 文件以了解支持的 DICOM 属性。
 
-_Details:_
-* Path: ../instances?SOPInstanceUID={instance}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../instances?SOPInstanceUID={instance}
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/instances?SOPInstanceUID=1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395" --header "Accept: application/dicom+json"`
 
 ---
-### Search-for-instances-within-a-study
+### 在研究内搜索实例
 
-This request enables searches for one or more instances within a single study by DICOM attributes.
+此请求支持按 DICOM 属性在单个研究内搜索一个或多个实例。
 
-> Please see the [Conformance.md](../docs/resources/conformance-statement.md) file for supported DICOM attributes.
+> 请参阅 [Conformance.md](../docs/resources/conformance-statement.md) 文件以了解支持的 DICOM 属性。
 
-_Details:_
-* Path: ../studies/{study}/instances?SOPInstanceUID={instance}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/instances?SOPInstanceUID={instance}
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/instances?SOPInstanceUID=1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395" --header "Accept: application/dicom+json"`
 
 ---
-### Search-for-instances-within-a-study-and-series
+### 在研究和序列内搜索实例
 
-This request enables searches for one or more instances within a single study and single series by DICOM attributes.
+此请求支持按 DICOM 属性在单个研究和单个序列内搜索一个或多个实例。
 
-> Please see the [Conformance.md](../docs/resources/conformance-statement.md) file for supported DICOM attributes.
+> 请参阅 [Conformance.md](../docs/resources/conformance-statement.md) 文件以了解支持的 DICOM 属性。
 
-_Details:_
-* Path: ../studies/{study}/series/{series}/instances?SOPInstanceUID={instance}
-* Method: GET
-* Headers:
+_详细信息：_
+* 路径：../studies/{study}/series/{series}/instances?SOPInstanceUID={instance}
+* 方法：GET
+* 标头：
    * `Accept: application/dicom+json`
 
 `curl --request GET "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652/instances?SOPInstanceUID=1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395" --header "Accept: application/dicom+json"`
 
 ---
-## Delete DICOM 
+## 删除 DICOM 
 ---
-### Delete-a-specific-instance-within-a-study-and-series
+### 删除研究和序列中的特定实例
 
-This request deletes a single instance within a single study and single series.
+此请求删除单个研究和单个序列中的单个实例。
 
-> Delete is not part of the DICOM standard, but has been added for convenience.
+> 删除不是 DICOM 标准的一部分，但已添加以便于使用。
 
-_Details:_
-* Path: ../studies/{study}/series/{series}/instances/{instance}
-* Method: DELETE
-* Headers: No special headers needed
+_详细信息：_
+* 路径：../studies/{study}/series/{series}/instances/{instance}
+* 方法：DELETE
+* 标头：不需要特殊标头
 
 `curl --request DELETE "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652/instances/1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395"`
 
 ---
-### Delete-a-specific-series-within-a-study
+### 删除研究中的特定序列
 
-This request deletes a single series (and all child instances) within a single study.
+此请求删除单个研究中的单个序列（以及所有子实例）。
 
-> Delete is not part of the DICOM standard, but has been added for convenience.
+> 删除不是 DICOM 标准的一部分，但已添加以便于使用。
 
-_Details:_
-* Path: ../studies/{study}/series/{series}
-* Method: DELETE
-* Headers: No special headers needed
+_详细信息：_
+* 路径：../studies/{study}/series/{series}
+* 方法：DELETE
+* 标头：不需要特殊标头
 
 `curl --request DELETE "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420/series/1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652"`
 
 ---
-### Delete-a-specific-study
+### 删除特定研究
 
-This request deletes a single study (and all child series and instances).
+此请求删除单个研究（以及所有子序列和实例）。
 
-> Delete is not part of the DICOM standard, but has been added for convenience.
+> 删除不是 DICOM 标准的一部分，但已添加以便于使用。
 
-_Details:_
-* Path: ../studies/{study}
-* Method: DELETE
-* Headers: No special headers needed
+_详细信息：_
+* 路径：../studies/{study}
+* 方法：DELETE
+* 标头：不需要特殊标头
 
 `curl --request DELETE "{base-url}/studies/1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420"`

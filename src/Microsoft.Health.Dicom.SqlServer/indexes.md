@@ -1,28 +1,23 @@
 # Indexes
 
-This document provides context on how the SQL indexes are organized on core tables.
+本文说明核心表的 SQL 索引组织方式。
 
-## Context
+## 背景
 
-Study, Series and Instance table all have PartitionKey, *Keys and *Uid's. 
-- `*Uids` are customer generated unique ids. 
-- `*Keys` are system generated primary keys. Key's are smaller and used for internal SQL joins only. Should not be distributed to customers.
-- `PartitionKey` allows logical grouping of data per partition. Losely held, no strong enforcement. Need to be extremely carefull to include in all filtering and exceptions should be carefully reviewed.
+Study、Series、Instance 表都有 PartitionKey、*Keys、*Uids：
+- `*Uids`：客户生成的唯一 ID。
+- `*Keys`：系统生成的主键，仅内部 JOIN 使用，体积更小，不应外发给客户。
+- `PartitionKey`：按分区进行逻辑分组，弱约束；过滤查询务必包含该列，例外需谨慎评审。
 
-## Best Practices
+## 最佳实践
 
-- All indexes will use PartitionKey as the first column. All SQL filtering should include PartitionKey. Cross partition QIDO is not supported today. In the future we can support in Analytics.
-- Exceptions like ExtendQueryTag/ChangeFeed/Re-Indexing which works across all partition, will have indexes on watermark that will be cross partition.
-- Indexes on both Uids and Keys will be supported. Uids are used during STOW and WADO from the customers. Keys are used for internal use only for joins.
+- 所有索引第一列使用 PartitionKey；所有 SQL 过滤应包含 PartitionKey。当前不支持跨分区 QIDO，后续可在 Analytics 支持。
+- ExtendedQueryTag / ChangeFeed / Re-Indexing 等跨分区场景，会在 watermark 上建跨分区索引。
+|- Uids 与 Keys 均建索引：Uids 供客户侧 STOW/WADO，Keys 仅内部 JOIN。
 
-### Diff indexes outside of transaction
+### 在事务外创建索引
 
-All indexes should be created outside of transaction and after the transaction has been committed. Having it inside the transaction
-will lock the table during creation and if it's a bigger table it'll cause issues.
-Even though ONLINE = ON allows most operations to continue while the index is being created, a short-term shared lock is still taken at the start of the operation, 
-and an exclusive lock is taken at the end. This means that other transactions cannot modify the data during these periods, so move the index to outside of
-transaction.
-Be sure to have the GO statement after the index, not after the begin transaction statement.
+索引应在事务外、事务提交后创建。放在事务内会在创建期间锁表，表越大问题越严重。即便使用 ONLINE=ON，开始会拿共享锁，结束会拿排他锁，都会阻塞写入，因此必须放在事务外。确保 `GO` 在索引之后，而不是在事务开始之后。
 
 ```sql
 SET XACT_ABORT ON

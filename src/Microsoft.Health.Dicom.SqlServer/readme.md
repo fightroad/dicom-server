@@ -1,47 +1,46 @@
-# Sql development guidelines
+# SQL 开发指南
 
-## Learning resources
+## 学习资源
 
 - [SQL server Internals	Microsoft SQL Server 2012 Internals](https://learning.oreilly.com/library/view/microsoft-sql-server/9780735670174/)
 - [Managing SQL Server Performance](https://app.pluralsight.com/library/courses/managing-sql-server-database-performance/table-of-contents)
 
-## Style Guide
+## 风格指南
 
 https://github.com/ktaranov/sqlserver-kit/blob/master/SQL%20Server%20Name%20Convention%20and%20T-SQL%20Programming%20Style.md
 
-## Making changes
+## 修改规范
 
-### Existing sql file
-- Edit the changes in the existing sql file
+### 已有 SQL 文件
+- 在现有 SQL 文件中直接编辑
 
-### New table/sproc
-- Add a new sql file in the corresponding folder in `Sql` folder
-- Update csproj with new `SqlScript` or `TSqlScript` file element
+### 新表/存储过程
+- 在 `Sql` 目录的对应文件夹添加新 SQL 文件
+- 在 csproj 中新增 `SqlScript` 或 `TSqlScript` 元素
 
-### Common
-- Update csproj prop
-    -  `<LatestSchemaVersion>` with latest version
-    -  `EmbeddedResource` to generate the latest c# models 
-- Full schema is auto generated from the Sql target build task
-- Migration diff script is manually generated and should follow recommedations [here](https://github.com/microsoft/healthcare-shared-components/tree/master/src/Microsoft.Health.SqlServer/SqlSchemaScriptsGuidelines.md)
+### 通用
+- 更新 csproj 属性：
+    - `<LatestSchemaVersion>` 为最新版本
+    - `EmbeddedResource` 以生成最新 C# 模型 
+- 完整架构由 Sql target build 任务自动生成
+- 迁移差异脚本需手动生成，并遵循[此指南](https://github.com/microsoft/healthcare-shared-components/tree/master/src/Microsoft.Health.SqlServer/SqlSchemaScriptsGuidelines.md)
 
-## Performance Checklist
+## 性能检查清单
 
-  - Beware of computed columns - even persisted ones tend to have weird issues. They're fine for simple storage/retrieval.
-  - Don't use CURSORS - if you need one, you're doing it wrong.
-  - Avoid Triggers - they're really hard to get right.
-  - Be careful with @tables - they work fine in Table Valued Parameters (TVPs) but otherwise the cardinality defaults to 1 which may be very bad.
-  - Minimize usage of temporary tables - they're expensive to create/destroy
-  - When using \#tables - make sure to create all indexes in place (i.e. do not change the table once created), otherwise it won't be cached.
-  - No dynamic SQL - it causes all kinds of issues (security, compilations, temp tables...) - servicing scripts and WIT are the only place you should find it.
-  - If there's only one good way to execute the query, hint it (see below for an example) so it cannot deviate. If there's a bad plan, the optimizer will find it, and you will get called.
-  - Don't go crazy with secondary indexes - make sure they're actually used - SQL has a DMV for that: sys.dm\_db\_index\_usage\_stats
-  - Avoid OR's in WHERE or JOIN clauses if there's an index - you can achieve the same effect with a UNION
+  - 谨慎使用计算列——即便持久化也可能有问题，简单存取可用。
+  - 避免 CURSOR——需要它通常意味着设计有问题。
+  - 少用 Trigger——很难正确实现。
+  - 小心 @tables——在 TVP 可用，其他场景基数默认 1 可能严重失真。
+  - 尽量少用临时表——创建/销毁开销大。
+  - 使用 \#tables 时创建后不要再修改结构，否则无法缓存，索引需一次建好。
+  - 禁用动态 SQL（安全、编译、临时表等风险），仅服务脚本/WIT 允许。
+  - 只有一种合理执行计划时，用 hint 固定；否则优化器可能跑出坏计划。
+  - 不要滥建二级索引，确认实际被用到；可用 sys.dm\_db\_index\_usage\_stats。
+  - WHERE/JOIN 有索引时避免 OR，可用 UNION 达成同效果。
 
-### Online Index Creation and page compression 
+### 在线索引与页面压缩 
 
-When we create new indexes or rebuild existing ones during database upgrade, it is very important that we pass **ONLINE=ON** option. Otherwise, SQL Azure will be holding an exclusive lock on the underlying table, which will block access to this table and may cause an LSI.
-Here is an example:
+数据库升级时创建或重建索引务必使用 **ONLINE=ON**，否则 SQL Azure 会对表持有排他锁，阻塞访问并可能引起 LSI。示例：
 
 ``` sql
 IF EXISTS (
@@ -56,11 +55,11 @@ BEGIN
     WITH (DROP_EXISTING=ON, ONLINE=ON)
 END
 ```
-## Sql Migration 
+## SQL 迁移 
 
 https://github.com/microsoft/healthcare-shared-components/tree/master/src/Microsoft.Health.SqlServer/SqlSchemaScriptsGuidelines.md
 
-## Sql Compatability
+## SQL 兼容性
 
-Binaries should be backcompatible with Latest and Latest-1 schema version atleast. 
+二进制应至少与最新及次新架构版本兼容。 
 

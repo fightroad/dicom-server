@@ -1,10 +1,10 @@
-# Authentication
+# Authentication（身份验证）
 
-The DICOM cast project supports connecting to both DICOM and FHIR servers that require authentication. Currently there are three types of authentication supported for both servers. The authentication can be configured via the application settings by the appropriate values in the `Authentication` property of the given server.
+DICOM Cast 支持连接需要身份验证的 DICOM 与 FHIR 服务器，当前两者均支持三种认证方式。可在应用配置中设置对应服务器的 `Authentication` 属性。
 
-## Managed Identity
+## Managed Identity（托管身份）
 
-This option uses the identity of the deployed DICOM cast instance to communicate with the server.
+使用已部署的 DICOM Cast 实例自身的身份与服务器通信。
 
 ```json
 {
@@ -23,7 +23,7 @@ This option uses the identity of the deployed DICOM cast instance to communicate
 
 ## OAuth2 Client Credential
 
-This option uses a `client_credentials` OAuth2 grant to obtain an identity to communicate with the server.
+使用 `client_credentials` 授权获取身份与服务器通信。
 
 ```json
 {
@@ -46,7 +46,7 @@ This option uses a `client_credentials` OAuth2 grant to obtain an identity to co
 
 ## OAuth2 User Password
 
-This option uses a `password` OAuth2 grant to obtain an identity to communicate with the server.
+使用 `password` 授权获取身份与服务器通信。
 
 ```json
 {
@@ -69,28 +69,27 @@ This option uses a `password` OAuth2 grant to obtain an identity to communicate 
 }
 ```
 
-## Secrets Management
+## Secrets 管理
 
-There are currently two ways provided to store secrets within the application.
+当前提供两种方式存储机密：
 
 ### User-Secrets
 
-User secrets are enabled when the `EnvironmentName` is `Development`. You can read more about the use of user secrets in [Safe storage of app secrets in development in ASP.NET Core](https://docs.microsoft.com/aspnet/core/security/app-secrets?view=aspnetcore-3.1).
+当 `EnvironmentName` 为 `Development` 时启用。详见 [ASP.NET Core 开发环境安全存储机密](https://docs.microsoft.com/aspnet/core/security/app-secrets?view=aspnetcore-3.1)。
 
 ### KeyVault
 
-Using KeyVault to store secrets can be enabled by entering a value into the `KeyVault:Endpoint` configuration. On application start this will use the [current identity of the application](https://docs.microsoft.com/en-us/aspnet/core/security/key-vault-configuration?view=aspnetcore-3.1#use-managed-identities-for-azure-resources) to read the key vault and add a configuration provider.
+在配置中填写 `KeyVault:Endpoint` 可启用 KeyVault 读取机密。应用启动时将使用[应用当前身份](https://docs.microsoft.com/en-us/aspnet/core/security/key-vault-configuration?view=aspnetcore-3.1#use-managed-identities-for-azure-resources)读取 KeyVault 并添加配置提供程序。
 
-Below is an example of the settings need to be added to the KeyVault for OAuth2ClientCredential authentication:
+以下为配置 OAuth2ClientCredential 认证时需要添加到 KeyVault 的示例：
 
-* Add secrets related to Authentication in KeyVault for Medical Imaging Server for DICOM.
-  + Example: If Medical Imaging Server for Azure was configured with `OAuth2ClientCredential`, below is the list of secrets that need to added to the KeyVault.
+* 在 KeyVault 中为 Medical Imaging Server for DICOM 添加与身份验证相关的机密，例如：
     - DicomWeb--Authentication--Enabled : True
     - DicomWeb--Authentication--AuthenticationType : OAuth2ClientCredential
     - DicomWeb--Authentication--OAuth2ClientCredential--TokenUri : ```<AAD tenant token uri>```
-    - DicomWeb--Authentication--OAuth2ClientCredential--Resource : ```Application ID URI of the resource app```
-    - DicomWeb--Authentication--OAuth2ClientCredential--Scope : ```Application ID URI of the resource app```
-    - DicomWeb--Authentication--OAuth2ClientCredential--ClientId : ```Client Id of the client app```
-    - DicomWeb--Authentication--OAuth2ClientCredential--ClientSecret : ```Client app secret```
-* Add similar secrets to KeyVault for FHIR&trade; server.
-* Stop and Start the Container, to pickup the new configurations.
+    - DicomWeb--Authentication--OAuth2ClientCredential--Resource : ```资源应用的 Application ID URI```
+    - DicomWeb--Authentication--OAuth2ClientCredential--Scope : ```资源应用的 Application ID URI```
+    - DicomWeb--Authentication--OAuth2ClientCredential--ClientId : ```客户端应用的 Client Id```
+    - DicomWeb--Authentication--OAuth2ClientCredential--ClientSecret : ```客户端应用的密钥```
+* 为 FHIR&trade; 服务器添加类似的机密。
+* 停止并重启容器以加载新配置。

@@ -1,15 +1,13 @@
-# Data Validation
+# 数据验证
 
-Because DICOM is a historical standard with a long history of implementations that conform to the standard to varying degrees,
-we expect DICOM data to vary widely in its strict adherence to the standard.
+因为 DICOM 是一个历史标准，具有不同程度上符合标准的实现历史，我们期望 DICOM 数据在严格遵循标准方面会有很大差异。
 
-**Our general approach is to be has lenient as possible, accepting DICOM data unless it has a direct effect on functionality.**
+**我们的总体方法是尽可能宽松，接受 DICOM 数据，除非它直接影响功能。**
 
-This approach plays out in the following ways currently:
-1. When DICOM data is received via a STOW request, we only validate data attributes that are indexed by default or via extended query tag.
-2. We will attempt to store all other data attributes as they are. 
-3. When new data attributes are indexed, extended query tag API handles errors gracefully, by continuing on validation errors and
-getting explicit consent to allow searching partially indexed data.
-4. New functionality should account for the presence of invalid data in unindexed attributes.
+这种方法目前以以下方式体现：
+1. 当通过 STOW 请求接收 DICOM 数据时，我们只验证默认索引或通过扩展查询标签索引的数据属性。
+2. 我们将尝试按原样存储所有其他数据属性。
+3. 当新数据属性被索引时，扩展查询标签 API 通过继续处理验证错误并明确同意允许搜索部分索引的数据来优雅地处理错误。
+4. 新功能应该考虑未索引属性中存在无效数据。
 
-Data validation errors are communicated on each request by response status codes and failure codes documented in the conformance statement.
+数据验证错误通过响应状态代码和符合性声明中记录的失败代码在每个请求上传达。

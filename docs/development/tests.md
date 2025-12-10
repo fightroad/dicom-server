@@ -1,23 +1,23 @@
-# Tests
+# 测试
 
-![Testing pyramid](/docs/images/TestPyramid.png)
+![测试金字塔](/docs/images/TestPyramid.png)
 
-- More unit tests, less integration tests, even less EnE tests.
-- Unit tests are used to test all combination of valid and invalid cases for a specific component.
-- E2E tests to validate all the integrations works for p0 scenario.
-- Manual directed bug bashes are used to augment the automated testing.
+- 更多单元测试，更少的集成测试，更少的 E2E 测试。
+- 单元测试用于测试特定组件的所有有效和无效情况的组合。
+- E2E 测试用于验证所有集成在 p0 场景中工作。
+- 手动定向 bug bash 用于补充自动化测试。
 
-## Unit tests
-- <em>Smallest testable part of software. </em>
-- All business logic pinned with unit tests.
+## 单元测试
+- <em>软件的最小可测试部分。</em>
+- 所有业务逻辑都用单元测试固定。
 
-## Integration tests
-- <em>Individual units are combined and tested as a group.</em>
-- DICOM uses integration tests to test the persistence layer.
+## 集成测试
+- <em>将各个单元组合在一起并作为组进行测试。</em>
+- DICOM 使用集成测试来测试持久化层。
 
-## End to End (E2E) tests
-- <em>End to end user scenarios are tested.</em>
-- DICOM uses E2E test methodology to test Web API endpoint behaviors.
+## 端到端 (E2E) 测试
+- <em>测试端到端用户场景。</em>
+- DICOM 使用 E2E 测试方法来测试 Web API 端点行为。
 
-## Function Tests
-- See [Functions](functions.md) for more information.
+## Function 测试
+- 有关更多信息，请参阅 [Functions](functions.md)。

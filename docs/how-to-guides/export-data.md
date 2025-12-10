@@ -1,15 +1,15 @@
-# Export DICOM Files
+# 导出 DICOM 文件
 
-The Medical Imaging Server for DICOM supports the bulk export of data to an [Azure Blob Storage account](https://azure.microsoft.com/en-us/services/storage/blobs/). Before starting, be sure that the feature is enabled in your [appsettings.json](../../src/Microsoft.Health.Dicom.Web/appsettings.json) or environment by setting the value `DicomServer:Features:EnableExtendedExport` to `true`.
+Medical Imaging Server for DICOM 支持将数据批量导出到 [Azure Blob 存储帐户](https://azure.microsoft.com/en-us/services/storage/blobs/)。在开始之前，请确保在 [appsettings.json](../../src/Microsoft.Health.Dicom.Web/appsettings.json) 或环境中通过将值 `DicomServer:Features:EnableExtendedExport` 设置为 `true` 来启用该功能。
 
-The export API is available at `POST /export`. Given a *source*, the set of data to be exported, and a *destination*, the location to which data will be exported, the endpoint returns a reference to the newly-started long-running export operation. The duration of this operation depends on the volume of data to be exported.
+导出 API 在 `POST /export` 可用。给定*源*（要导出的数据集）和*目标*（数据将导出到的位置），端点返回对新启动的长时间运行导出操作的引用。此操作的持续时间取决于要导出的数据量。
 
-## Example
+## 示例
 
-The below example requests the export of the following DICOM resources to the blob container named `"export"` in the local Azure storage emulator:
-- All instances within the study whose Study Instance UID is `1.2.3`
-- All instances within the series whose Study Instance UID is `12.3` and Series Instance UID is `4.5.678`
-- The instance whose Study Instance UID is `123.456`, Series Instance UID is `7.8`, and SOP Instance UID is `9.1011.12`
+下面的示例请求将以下 DICOM 资源导出到本地 Azure 存储模拟器中名为 `"export"` 的 blob 容器：
+- Study Instance UID 为 `1.2.3` 的研究中的所有实例
+- Study Instance UID 为 `12.3` 且 Series Instance UID 为 `4.5.678` 的序列中的所有实例
+- Study Instance UID 为 `123.456`、Series Instance UID 为 `7.8` 且 SOP Instance UID 为 `9.1011.12` 的实例
 
 ```http
 POST /export HTTP/1.1
@@ -37,9 +37,9 @@ Content-Type: application/json
 }
 ```
 
-## Request
+## 请求
 
-The request body consists of the export source and destination.
+请求体由导出源和目标组成。
 
 ```json
 {
@@ -59,32 +59,32 @@ The request body consists of the export source and destination.
 }
 ```
 
-### Source Settings
+### 源设置
 
-The only setting is the list of identifiers to export.
+唯一的设置是要导出的标识符列表。
 
-| Property | Required | Default | Description |
+| 属性 | 必需 | 默认值 | 描述 |
 | :------- | :------- | :------ | :---------- |
-| `Values` | Yes      |         | A list of one or more DICOM studies, series, and/or SOP instances identifiers in the format of `"<study instance UID>[/<series instance UID>[/<SOP instance UID>]]"` |
+| `Values` | 是      |         | 一个或多个 DICOM 研究、序列和/或 SOP 实例标识符的列表，格式为 `"<study instance UID>[/<series instance UID>[/<SOP instance UID>]]"` |
 
-### Destination Settings
+### 目标设置
 
-The connection to the Azure Blob storage account can be specified with either a `ConnectionString` and `BlobContainerName` or a `BlobContainerUri`. One of these settings is required.
+与 Azure Blob 存储帐户的连接可以使用 `ConnectionString` 和 `BlobContainerName` 或 `BlobContainerUri` 指定。需要这些设置之一。
 
-If the storage account requires authentication, a [SAS token](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview) can be included in either the `ConnectionString` or `BlobContaienrUri` with `Write` permissions for `Objects` in the `Blob` service. A managed identity can also be used to access the storage account with the `UseManagedIdentity` option. The identity must be used by both the DICOM server and the functions, and furthermore it must be assigned the [`Storage Blob Data Contributor`](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor) role.
+如果存储帐户需要身份验证，可以在 `ConnectionString` 或 `BlobContainerUri` 中包含 [SAS 令牌](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview)，对 `Blob` 服务中的 `Objects` 具有 `Write` 权限。也可以使用 `UseManagedIdentity` 选项使用托管标识访问存储帐户。DICOM 服务器和函数都必须使用该标识，并且必须为其分配 [`Storage Blob Data Contributor`](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor) 角色。
 
-| Property             | Required | Default | Description |
+| 属性             | 必需 | 默认值 | 描述 |
 | :------------------- | :------- | :------ | :---------- |
-| `BlobContainerName`  | No       | `""`    | The name of a blob container. Only required when `ConnectionString` is specified |
-| `BlobContainerUri`   | No       | `""`    | The complete URI for the blob container                      |
-| `ConnectionString`   | No       | `""`    | The [Azure Storage connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string) that must minimally include information for blob storage |
-| `UseManagedIdentity` | No       | `false` | An optional flag indicating whether managed identity should be used to authenticate to the blob container |
+| `BlobContainerName`  | 否       | `""`    | blob 容器的名称。仅在指定 `ConnectionString` 时需要 |
+| `BlobContainerUri`   | 否       | `""`    | blob 容器的完整 URI                      |
+| `ConnectionString`   | 否       | `""`    | [Azure 存储连接字符串](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string)，必须至少包含 blob 存储的信息 |
+| `UseManagedIdentity` | 否       | `false` | 指示是否应使用托管标识对 blob 容器进行身份验证的可选标志 |
 
-## Response
+## 响应
 
-Upon successfully starting an export operation, the export API returns a `202` status code. The body of the response contains a reference to the operation, while the value of the `Location` header is the URL for the export operation's status (the same as `href` in the body).
+成功启动导出操作后，导出 API 返回 `202` 状态代码。响应体包含对操作的引用，而 `Location` 标头的值是导出操作状态的 URL（与正文中的 `href` 相同）。
 
-Inside of the destination container, the DCM files can be found with the following path format: `<operation id>/results/<study>/<series>/<sop instance>.dcm`
+在目标容器内，DCM 文件可以使用以下路径格式找到：`<operation id>/results/<study>/<series>/<sop instance>.dcm`
 
 ```http
 HTTP/1.1 202 Accepted
@@ -96,8 +96,9 @@ Content-Type: application/json
 }
 ```
 
-### Operation Status
-The above `href` URL can be polled for the current status of the export operation until completion. A terminal state is signified by a `200` status instead of `202`.
+### 操作状态
+
+可以轮询上述 `href` URL 以获取导出操作的当前状态，直到完成。终端状态由 `200` 状态而不是 `202` 表示。
 
 ```http
 HTTP/1.1 200 OK
@@ -117,16 +118,16 @@ Content-Type: application/json
 }
 ```
 
-## Errors
+## 错误
 
-If there are any errors when exporting a DICOM file (that was determined not to be a problem with the client), then the file is skipped and its corresponding error is logged. This error log is also exported alongside the DICOM files and can be reviewed by the caller. The error log can be found at `<export blob container uri>/<operation ID>/errors.log`.
+如果在导出 DICOM 文件时出现任何错误（已确定不是客户端的问题），则跳过该文件并记录相应的错误。此错误日志也与 DICOM 文件一起导出，调用者可以查看。错误日志可以在 `<export blob container uri>/<operation ID>/errors.log` 找到。
 
-### Format
+### 格式
 
-Each line of the error log is a JSON object with the following properties. Note that a given error identifier may appear multiple times in the log as each update to the log is processed *at least once*.
+错误日志的每一行都是一个 JSON 对象，具有以下属性。请注意，给定的错误标识符可能在日志中出现多次，因为对日志的每次更新都会*至少处理一次*。
 
-| Property     | Description |
+| 属性     | 描述 |
 | ------------ | ----------- |
-| `Timestamp`  | The date and time when the error occurred |
-| `Identifier` | The identifier for the DICOM study, series, or SOP instance in the format of `"<study instance UID>[/<series instance UID>[/<SOP instance UID>]]"` |
-| `Error`      | The error message |
+| `Timestamp`  | 发生错误的日期和时间 |
+| `Identifier` | DICOM 研究、序列或 SOP 实例的标识符，格式为 `"<study instance UID>[/<series instance UID>[/<SOP instance UID>]]"` |
+| `Error`      | 错误消息 |

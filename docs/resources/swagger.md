@@ -1,87 +1,75 @@
 # Swagger
 
-We use [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle.AspNetCore) to generate Swagger/ API Documentation.
-If you've never worked with Swagger before, it may be helpful to
-checkout [this sample](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/tutorials/web-api-help-pages-using-swagger/samples/6.x/SwashbuckleSample)
-and play with it.
+我们使用 [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle.AspNetCore) 生成 Swagger/API 文档。
+如果您以前从未使用过 Swagger，查看[此示例](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/tutorials/web-api-help-pages-using-swagger/samples/6.x/SwashbuckleSample) 并尝试使用它可能会有所帮助。
 
-A quick summary of workflow is:
+工作流程的快速摘要：
 
-- Make changes to an API or to some of the customizations or defaults we have for swagger
-- Build the solution. The .dll generated is what is then used to generate the API documentation.
-- Use `dotnet swagger` to generate documentation from the new .dll
+- 对 API 或我们为 swagger 拥有的某些自定义或默认值进行更改
+- 构建解决方案。生成的 .dll 然后用于生成 API 文档。
+- 使用 `dotnet swagger` 从新的 .dll 生成文档
 
-The DICOM OSS project is setup to autogenerate this documentation for you on build.
+DICOM OSS 项目设置为在构建时自动为您生成此文档。
 
-## Customization and Defaulting
+## 自定义和默认值
 
-Swagger and customizations are
-set [here](https://github.com/microsoft/dicom-server/blob/main/src/Microsoft.Health.Dicom.Api/Registration/DicomServerServiceCollectionExtensions.cs#L133)
-.
+Swagger 和自定义设置在[这里](https://github.com/microsoft/dicom-server/blob/main/src/Microsoft.Health.Dicom.Api/Registration/DicomServerServiceCollectionExtensions.cs#L133)设置。
 
-We've written some customizations and added defaults.
+我们已经编写了一些自定义并添加了默认值。
 
-Defaults can be seen at src/Microsoft.Health.Dicom.Api/Configs/SwaggerConfiguration.cs.
-Customizations can be seen at src/Microsoft.Health.Dicom.Api/Features/Swagger.
+默认值可以在 src/Microsoft.Health.Dicom.Api/Configs/SwaggerConfiguration.cs 中看到。
+自定义可以在 src/Microsoft.Health.Dicom.Api/Features/Swagger 中看到。
 
-Note that we also specify Licensing in src/Microsoft.Health.Dicom.Web/appsettings.json. If you take out the License
-defaulting in SwaggerConfiguration.cs, appsettings.json will be used to get Licensing when using the post build hook.
-However, these settings are not used if using `dotnet swagger` in your terminal, outside of a build. If anyone knows
-why, please replace this content.
+请注意，我们还在 src/Microsoft.Health.Dicom.Web/appsettings.json 中指定了许可。如果您在 SwaggerConfiguration.cs 中删除许可默认值，appsettings.json 将在使用构建后钩子时用于获取许可。
+但是，如果在构建之外的终端中使用 `dotnet swagger`，则不会使用这些设置。如果有人知道原因，请替换此内容。
 
-## Updating Swagger YAML
+## 更新 Swagger YAML
 
-Swagger yaml will be generated for you on each build using a post build hook name `SwaggerPostBuildTarget` in
-Microsoft.Health.Dicom.Web.csproj.
+Swagger yaml 将在每次构建时使用 Microsoft.Health.Dicom.Web.csproj 中名为 `SwaggerPostBuildTarget` 的构建后钩子为您生成。
 
-### Add A New Version
+### 添加新版本
 
-You can add a new version by adding a new `Exec MSBuild task` in `Microsoft.Health.Dicom.Web.csproj`.
-Output should go to `swagger\<your-new-version>\swagger.yaml` and with `<your-new-version>` at the end of
-the `dotnet swagger tofile` command,
-specifying `name of the swagger doc you want to retrieve, as configured in your startup class`.
+您可以通过在 `Microsoft.Health.Dicom.Web.csproj` 中添加新的 `Exec MSBuild 任务`来添加新版本。
+输出应该转到 `swagger\<your-new-version>\swagger.yaml`，并在 `dotnet swagger tofile` 命令的末尾使用 `<your-new-version>`，指定`您要检索的 swagger 文档的名称，如启动类中配置的那样`。
 
-Example:
+示例：
 
 ```
 <Exec Command="dotnet swagger tofile  --yaml --output ..\..\swagger\v1\swagger.yaml $(OutputPath)\Microsoft.Health.Dicom.Web.dll v1"></Exec>
 ```
 
-Be sure to also update the build/common/versioning.yml Powershell tasks to check for new versions.
+请确保还更新 build/common/versioning.yml PowerShell 任务以检查新版本。
 
-### ADO Checks
+### ADO 检查
 
-We utilize [openapi-diff](https://github.com/OpenAPITools/openapi-diff) to check for differences and breaking API
-changes.
+我们利用 [openapi-diff](https://github.com/OpenAPITools/openapi-diff) 来检查差异和破坏性 API 更改。
 
-#### Checks For Latest Swagger
+#### 检查最新 Swagger
 
-As a way to ensure we always keep the swagger yaml up to date, there is a step in our ADO pipeline that will generate
-swagger and error out if what is generated has differences from the yaml that was checked in.
-This script lives in ./build/common/scripts/CheckForSwaggerChanges.ps1
+作为确保我们始终保持 swagger yaml 最新的方法，我们的 ADO 管道中有一个步骤，如果生成的内容与签入的 yaml 有差异，将生成 swagger 并出错。
+此脚本位于 ./build/common/scripts/CheckForSwaggerChanges.ps1
 
-You can run this script locally as well:
+您也可以在本地运行此脚本：
 
 ```
 .\build\common\scripts\CheckForSwaggerChanges.ps1  -SwaggerDir 'swagger' -AssemblyDir 'src\Microsoft.Health.Dicom.Web\bin\x64\Debug\net6.0\Microsoft.Health.Dicom.Web.dll' -Version 'v1-prerelease','v1'
 ```
 
-Note that this script does not use `dotnet swagger`'s comparison to detect changes as that only looks like API changes.
-We want to compare the file as a whole, so we use Powershell's `Compare-Object` instead.
+请注意，此脚本不使用 `dotnet swagger` 的比较来检测更改，因为它只查看 API 更改。
+我们希望比较整个文件，因此我们使用 PowerShell 的 `Compare-Object`。
 
-#### Checks for Breaking APIChanges
+#### 检查破坏性 API 更改
 
-As a way to ensure we always consider breaking API changes, there is a step in our ADO pipeline that will error out if
-what was checked in has breaking changes compared to the yaml in main branch.
-This script lives in ./build/common/scripts/CheckForBreakingAPISwaggerChanges.ps1
+作为确保我们始终考虑破坏性 API 更改的方法，我们的 ADO 管道中有一个步骤，如果签入的内容与主分支中的 yaml 相比有破坏性更改，将出错。
+此脚本位于 ./build/common/scripts/CheckForBreakingAPISwaggerChanges.ps1
 
-You can run this script locally as well:
+您也可以在本地运行此脚本：
 
 ```
 .\build\common\scripts\CheckForBreakingAPISwaggerChanges.ps1  -SwaggerDir 'swagger' -Version 'v1-prerelease','v1'
 ```
 
-Example output with no changes:
+无更改的示例输出：
 
 ```
 

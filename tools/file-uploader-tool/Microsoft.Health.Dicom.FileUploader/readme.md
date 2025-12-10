@@ -1,23 +1,22 @@
-﻿# Overview
-This command-line tool can be used to upload DICOM file(s) to a target DICOMWeb endpoint. The default behavior is to upload the file(s) in the [Images](./Images) folder, or you
-can specify a directory to upload all files with the `.dcm` file extension.
+﻿# 概述
+命令行工具，用于将 DICOM 文件上传到目标 DICOMWeb 端点。默认上传 [Images](./Images) 目录下的文件，也可指定目录批量上传 `.dcm` 文件。
 
-This tool can be run locally, or from an Azure VM with a managed identity enabled.
+可本地运行，或在启用托管身份的 Azure VM 上运行。
 
-# Arguments
+# 参数
 ## --dicomServiceUrl
-Dicom service URL to target. If not specified, will default to the standard port for the DICOM server running locally: `https://localhost:63838`.
+目标 DICOM 服务 URL，未指定时默认本地标准端口：`https://localhost:63838`。
 
 ## --path
-Path to a directory containing `.dcm` files to be uploaded. If not specified, will default to `/Images`.
+包含 `.dcm` 文件的目录，未指定时默认 `/Images`。
 
-# Example
-To upload the sample file, run:
+# 示例
+上传示例文件：
 ```
 dotnet run --dicomServiceUrl "https://testdicomweb-testdicom.dicom.azurehealthcareapis.com"
 ```
 
-To upload all `.dcm` files in a specific directory to a locally running service, run:
+将指定目录的 `.dcm` 批量上传到本地服务：
 ```
 dotnet run --path C:\dicomdir
 ```

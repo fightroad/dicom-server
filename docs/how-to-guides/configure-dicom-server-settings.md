@@ -1,116 +1,114 @@
-# Configure Medical Imaging Server for DICOM Settings
+# 配置 Medical Imaging Server for DICOM 设置
 
-This How-to Guide explains how to configure settings for the Medical Imaging Server for DICOM after deployment.
+本操作指南说明如何在部署后配置 Medical Imaging Server for DICOM 的设置。
 
-## Prerequisites
+## 先决条件
 
-To configure your Medical Imaging Server for DICOM, you need to have an instance deployed. If you have not already deployed the Medical Imaging Server, [deploy an instance to Azure](../quickstarts/deploy-via-azure.md).
+要配置 Medical Imaging Server for DICOM，您需要部署一个实例。如果尚未部署 Medical Imaging Server，请[部署一个实例到 Azure](../quickstarts/deploy-via-azure.md)。
 
-## Manage Authentication
+## 管理身份验证
 
-To configure authentication for the Medical Imaging Server for DICOM using Azure AD, see [Enable Authentication with Tokens](../how-to-guides/enable-authentication-with-tokens.md).
+要使用 Azure AD 配置 Medical Imaging Server for DICOM 的身份验证，请参阅[使用令牌启用身份验证](../how-to-guides/enable-authentication-with-tokens.md)。
 
-To manage authentication in development and test scenarios without AAD integration using an Identity Provider, see [Identity Server Authentication](../development/identity-server-authentication.md).
+要在不使用 AAD 集成的开发和测试场景中使用 Identity Provider 管理身份验证，请参阅[Identity Server 身份验证](../development/identity-server-authentication.md)。
 
-## Manage Azure App Service
+## 管理 Azure App Service
 
-The S1 tier is the default App Service Plan SKU enabled upon deployment. Azure offers a variety of plans to meet your workload requirements. To learn more about the various plans, view the [App Service pricing](https://azure.microsoft.com/pricing/details/app-service/windows/).
+S1 层是部署时启用的默认 App Service Plan SKU。Azure 提供多种计划以满足您的工作负载需求。要了解有关各种计划的更多信息，请查看 [App Service 定价](https://azure.microsoft.com/pricing/details/app-service/windows/)。
 
-If you would like to Scale Up your App Service plan to a different tier:
+如果您想将 App Service 计划扩展到不同层级：
 
-1. Navigate to your Medical Imaging Server for DICOM **App Service** in the Azure Portal.
-1. Select **Scale up (App Service plan)** from the menu:
-![Scale Up](../images/scale-up-1.png)
-1. Select the plan that fits your workload requirements:
-![Scale Up 2](../images/scale-up-2.png)
-1. Click **Apply**.
+1. 在 Azure 门户中导航到 Medical Imaging Server for DICOM **App Service**。
+2. 从菜单中选择**扩展（App Service 计划）**：
+![扩展](../images/scale-up-1.png)
+3. 选择适合您工作负载需求的计划：
+![扩展 2](../images/scale-up-2.png)
+4. 单击**应用**。
 
-Autoscale is a built-in feature that helps applications perform their best when demand changes. You can choose to scale your resource manually to a specific instance count, or via a custom Autoscale policy that scales based on metric(s) thresholds, or scheduled instance count which scales during designated time windows. Autoscale enables your resource to be performant and cost effective by adding and removing instances based on demand
+自动扩展是一项内置功能，可在需求变化时帮助应用程序发挥最佳性能。您可以选择手动将资源扩展到特定实例计数，或通过基于指标阈值的自定义自动扩展策略，或在指定时间窗口内扩展的计划实例计数。自动扩展通过根据需求添加和删除实例，使您的资源具有高性能和成本效益
 
-In addition to Scale Up, you can also Scale Out your App Service Plan to meet the requirements of your workload. You can select to manually scale your service to maintain a fixed instance count, or custom autoscale your service based on any metrics. If you would like to Scale Out your App Service Plan:
+除了扩展之外，您还可以扩展 App Service Plan 以满足工作负载的需求。您可以选择手动扩展服务以维护固定实例计数，或基于任何指标自定义自动扩展服务。如果您想扩展 App Service Plan：
 
-1. Navigate to your Medical Imaging Server for DICOM **App Service** in the Azure Portal.
-1. Select **Scale out (App Service plan)** from the menu:
-![Scale Out](../images/scale-out-1.png)
-1. Choose the Scale Out option that best fits your requirements:
-![Scale Out 2](../images/scale-out-2.png)
-1. Select **Save**.
+1. 在 Azure 门户中导航到 Medical Imaging Server for DICOM **App Service**。
+2. 从菜单中选择**横向扩展（App Service 计划）**：
+![横向扩展](../images/scale-out-1.png)
+3. 选择最适合您需求的横向扩展选项：
+![横向扩展 2](../images/scale-out-2.png)
+4. 选择**保存**。
 
-For suggested guidance on Azure App Service tiers, see [Medical Imaging Server for DICOM Performance Guidance](../resources/performance-guidance.md).
+有关 Azure App Service 层级的建议指导，请参阅 [Medical Imaging Server for DICOM 性能指南](../resources/performance-guidance.md)。
 
-## Manage SQL Database
+## 管理 SQL 数据库
 
-The Standard tier of the DTU-based SQL performance tiers is enabled by default upon deployment. In DTU-based SQL purchase models, a fixed set of resources is assigned to the database via performance tiers: Basic, Standard and Premium. To learn more about the various tiers, view the [Azure SQL Database Pricing](https://azure.microsoft.com/pricing/details/sql-database/single/).
+默认情况下，部署时启用基于 DTU 的 SQL 性能层级的标准层。在基于 DTU 的 SQL 购买模型中，通过性能层级为数据库分配一组固定资源：基本、标准和高级。要了解有关各种层级的更多信息，请查看 [Azure SQL 数据库定价](https://azure.microsoft.com/pricing/details/sql-database/single/)。
 
-If you would like to update your SQL Database tier:
+如果您想更新 SQL 数据库层级：
 
-1. Navigate to the **SQL Database** you created when you deployed the Medical Imaging Server for DICOM.
-1. Select **Configure**:
-![Configure Sql1](../images/configure-sql-1.png)
-1. Choose the performance tier and DTU level that meets your workload requirements:
-![Configure SQL2](../images/configure-sql-2.png)
-1. Click **Apply**.
+1. 导航到部署 Medical Imaging Server for DICOM 时创建的 **SQL 数据库**。
+2. 选择**配置**：
+![配置 SQL1](../images/configure-sql-1.png)
+3. 选择满足您工作负载需求的性能层级和 DTU 级别：
+![配置 SQL2](../images/configure-sql-2.png)
+4. 单击**应用**。
 
+有关 SQL 数据库层级的建议指导，请参阅 [Medical Imaging Server for DICOM 性能指南](../resources/performance-guidance.md)。
 
-For suggested guidance on SQL Database Tiers, see [Medical Imaging Server for DICOM Performance Guidance](../resources/performance-guidance.md).
-
-## Additional Configuration Settings
+## 其他配置设置
 
 ## Azure Monitor
 
-
-[Azure Monitor](https://docs.microsoft.com/azure/azure-monitor/overview) offers a variety of solutions to collect, analyze and act on telemetry, including Application Insights Log Analytics.
+[Azure Monitor](https://docs.microsoft.com/azure/azure-monitor/overview) 提供多种解决方案来收集、分析和处理遥测数据，包括 Application Insights Log Analytics。
 
 ### Application Insights
 
-If you deploy the Medical Imaging Server for DICOM with our [Quickstart Deploy to Azure](../quickstarts/deploy-via-azure.md), Application Insights is deployed and enabled by default. To view and customize Application Insights:
+如果您使用我们的[快速入门部署到 Azure](../quickstarts/deploy-via-azure.md) 部署 Medical Imaging Server for DICOM，Application Insights 默认部署并启用。要查看和自定义 Application Insights：
 
-1. Navigate to your Medical Imaging Server for DICOM **Application Insights** resource.
-1. Select **Availability**, **Failures** or **Performance** for insight into the performance of your App Service.
-1. To link your Application Insights resource to your Medical Imaging Server for DICOM Web App:
-    1. Navigate to your Medical Imaging Server for DICOM **App Service**.
-    1. Select **Application Insights** under **Settings**. Select *Enable* Application Insights. Select the existing Application Insights resource which was deployed.
-    1. Optionally, you can enable Application Insights features like *Profiler*, *Snapshot Debugger* and *SQL Commands*. (Note, these can be turned on later).
-    1. Click *Apply*. 
-1. To learn how to customize Application Insights for your requirements, see [Application Insights Overview](https://docs.microsoft.com/azure/azure-monitor/app/app-insights-overview). 
+1. 导航到 Medical Imaging Server for DICOM **Application Insights** 资源。
+2. 选择**可用性**、**失败**或**性能**以了解 App Service 的性能。
+3. 要将 Application Insights 资源链接到 Medical Imaging Server for DICOM Web 应用：
+    1. 导航到 Medical Imaging Server for DICOM **App Service**。
+    2. 在**设置**下选择**Application Insights**。选择*启用* Application Insights。选择已部署的现有 Application Insights 资源。
+    3. 可选地，您可以启用 Application Insights 功能，如*Profiler*、*Snapshot Debugger* 和 *SQL Commands*。（注意，这些可以稍后打开）。
+    4. 单击*应用*。
+4. 要了解如何根据您的需求自定义 Application Insights，请参阅 [Application Insights 概述](https://docs.microsoft.com/azure/azure-monitor/app/app-insights-overview)。
 
-If you did not enable Application Insights during deployment, you can via the Azure Portal:
+如果您在部署期间未启用 Application Insights，可以通过 Azure 门户启用：
 
-1. Navigate to your Medical Imaging Server for DICOM **App Service**.
-1. Select **Application Insights** from the menu:
+1. 导航到 Medical Imaging Server for DICOM **App Service**。
+2. 从菜单中选择**Application Insights**：
 ![App Insights 1](../images/app-insights-1.png)
-1. Select **Turn on Application Insights**:
+3. 选择**启用 Application Insights**：
 ![App Insights 2](../images/app-insights-2.png)
-1. Link your App Service to an Application Insights Resource. You can create a new name for your **Application Insights** resource or use the default name. Select **Apply**.
-1. View and customize **Application Insights** by navigating to the created **Application Insights** resource.
+4. 将 App Service 链接到 Application Insights 资源。您可以为 **Application Insights** 资源创建新名称或使用默认名称。选择**应用**。
+5. 通过导航到创建的 **Application Insights** 资源来查看和自定义 **Application Insights**。
 
-### Diagnostic Settings & Log Analytics
+### 诊断设置和 Log Analytics
 
-To monitor your SQL Database, create diagnostic settings which stream to Log Analytics:
+要监控 SQL 数据库，创建流式传输到 Log Analytics 的诊断设置：
 
-1. Navigate to your **SQL Database**.
-1. Select **Diagnostic Settings**:
-![Diagnostic settings 1](../images/diagnostic-settings-1.png)
-1. Select **Add Diagnostic setting**:
-![Diagnostic settings 2](../images/diagnostic-settings-2.png)
-1. Select the log and/or metric diagnostic settings you would like to monitor, along with the destination for those logs and/or metrics:
-![Diagnostic settings 3](../images/diagnostic-settings-3.png)
-1. Select **Save**.
+1. 导航到您的 **SQL 数据库**。
+2. 选择**诊断设置**：
+![诊断设置 1](../images/diagnostic-settings-1.png)
+3. 选择**添加诊断设置**：
+![诊断设置 2](../images/diagnostic-settings-2.png)
+4. 选择要监控的日志和/或指标诊断设置，以及这些日志和/或指标的目标：
+![诊断设置 3](../images/diagnostic-settings-3.png)
+5. 选择**保存**。
 
-To learn how to customize your diagnostic settings further, see [Diagnostic Settings](https://docs.microsoft.com/azure/azure-monitor/platform/diagnostic-settings?WT.mc_id=Portal-Microsoft_Azure_Monitoring). To learn how to write queries with Log Analytics, see [Log Query Overview](https://docs.microsoft.com/azure/azure-monitor/log-query/log-query-overview).
+要了解如何进一步自定义诊断设置，请参阅[诊断设置](https://docs.microsoft.com/azure/azure-monitor/platform/diagnostic-settings?WT.mc_id=Portal-Microsoft_Azure_Monitoring)。要了解如何使用 Log Analytics 编写查询，请参阅[日志查询概述](https://docs.microsoft.com/azure/azure-monitor/log-query/log-query-overview)。
 
-## OHIF Viewer
+## OHIF 查看器
 
-By default, OHIF Viewer is enabled when you deploy the Medical Imaging Server for DICOM to Azure. To update this setting:
+默认情况下，当您将 Medical Imaging Server for DICOM 部署到 Azure 时，OHIF 查看器已启用。要更新此设置：
 
-1. Navigate to your Medical Imaging Server for DICOM **App Service** in the Azure Portal.
-1. Select **Configuration** from the menu:
-![OHIF Viewer1](../images/ohif-viewer-1.png)
-1. Select the *Edit* button for **DicomServer:Features:EnableOhifViewer**:
-![OHIF Viewer1](../images/ohif-viewer-2.png)
-1. Update the **Value** to *False* and select **Ok**.
-1. Click **Save** to update the setting.
+1. 在 Azure 门户中导航到 Medical Imaging Server for DICOM **App Service**。
+2. 从菜单中选择**配置**：
+![OHIF 查看器1](../images/ohif-viewer-1.png)
+3. 选择 **DicomServer:Features:EnableOhifViewer** 的*编辑*按钮：
+![OHIF 查看器2](../images/ohif-viewer-2.png)
+4. 将**值**更新为 *False* 并选择**确定**。
+5. 单击**保存**以更新设置。
 
-## Summary
+## 总结
 
-This How-to Guide explained how to configure settings for the Medical Imaging Server for DICOM after deployment. Once your Medical Imaging Server for DICOM is deployed and configured, you can [Use Medical Imaging Server for DICOM APIs](../tutorials/use-the-medical-imaging-server-apis.md).
+本操作指南说明了如何在部署后配置 Medical Imaging Server for DICOM 的设置。一旦 Medical Imaging Server for DICOM 部署并配置完成，您可以[使用 Medical Imaging Server for DICOM API](../tutorials/use-the-medical-imaging-server-apis.md)。

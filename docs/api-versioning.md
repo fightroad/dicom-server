@@ -1,65 +1,62 @@
-# API Versioning for DICOM Server
+# DICOM 服务器的 API 版本控制
 
-This guide gives an overview of the API version policies for DICOM Server.
+本指南概述了 DICOM 服务器的 API 版本策略。
 
-All versions of the DICOM APIs will always conform to the DICOMweb™ Standard specifications, but versions may expose different APIs based on our [conformance statement](https://github.com/microsoft/dicom-server/blob/main/docs/resources/conformance-statement.md).
+DICOM API 的所有版本都将始终符合 DICOMweb™ 标准规范，但版本可能根据我们的[符合性声明](https://github.com/microsoft/dicom-server/blob/main/docs/resources/conformance-statement.md)公开不同的 API。
 
-## Specifying version of REST API in Requests
+## 在请求中指定 REST API 版本
 
-The version of the REST API must be explicitly specified in the request URL as in the following example:
+REST API 的版本必须在请求 URL 中明确指定，如下例所示：
 
 `https://<service_url>/v<version>/studies`
 
-**Note:** Routes without a version are no longer supported.
+**注意：**不再支持没有版本的路由。
 
+### 支持的版本
 
-### Supported Versions
-
-Currently the supported versions are:
+当前支持的版本是：
 - v1.0-prerelease
 - v1
 
-The OpenApi Doc for the supported versions can be found at the following url: `https://<service_url>/{version}/api.yaml`
+支持版本的 OpenApi 文档可以在以下 URL 找到：`https://<service_url>/{version}/api.yaml`
 
+### 预发布版本
 
-### Prerelease versions
+带有 "prerelease" 标签的 API 版本表示该版本尚未准备好用于生产，应仅在测试环境中使用。这些端点可能会在不通知的情况下经历破坏性变更。
 
-An API version with the label "prerelease" indicates that the version is not ready for production, and should only be used in testing environments. These endpoints may experience breaking changes without notice.
+### 版本如何递增
 
-### How Versions Are Incremented
+我们目前只在存在不被视为向后兼容的破坏性变更时递增主版本。
 
-We currently only increment the major version whenever there is a breaking change which is considered to be not backwards compatible.
+破坏性变更的一些示例（递增主版本）：
+1. 重命名或删除端点
+2. 删除参数或添加必需参数
+3. 更改状态代码
+4. 删除响应中的属性或更改响应类型（但可以向响应添加属性）
+5. 更改属性的类型
+6. API 的行为发生变化（业务逻辑的变化，过去做 foo，现在做 bar）
 
-Some Examples of a breaking change (Major version is incremented):
-1. Renaming or removing endpoints
-2. Removing parameters or adding mandatory parameters
-3. Changing status code
-4. Deleting property in response or altering response type at all (but okay to add properties to the response)
-5. Changing the type of a property
-6. Behavior of an API changes (changes in business logic, used to do foo, now does bar)
+非破坏性变更（不递增版本）：
+1. 添加可为空或具有默认值的属性
+2. 向响应模型添加属性
+3. 更改属性的顺序
 
-Non-breaking changes (Version is not incremented):
-1. Addition of properties that are nullable or have a default value
-2. Addition of properties to a response model
-3. Changing the order of properties
+### 响应中的标头
 
-### Headers in responses
+`ReportApiVersions` 已开启，这意味着我们将在适当时返回 `api-supported-versions` 和 `api-deprecated-versions` 标头。
 
-`ReportApiVersions` is turned on, which means we will return the headers `api-supported-versions` and `api-deprecated-versions` when appropriate.
+- `api-supported-versions` 将列出请求的 API 支持哪些版本。仅在调用使用 `[ApiVersion("<someVersion>")]` 注释的端点时返回。
 
-- `api-supported-versions` will list which versions are supported for the requested API. It is only returned when calling an endpoint annotated with `[ApiVersion("<someVersion>")]`.
+- `api-deprecated-versions` 将列出请求的 API 已弃用哪些版本。仅在调用使用 `[ApiVersion("<someVersion>", Deprecated = true)]` 注释的端点时返回。
 
-- `api-deprecated-versions` will list which versions have been deprecated for the requested API. It is only returned when calling an endpoint annotated with `[ApiVersion("<someVersion>", Deprecated = true)]`.
-
-Example:
+示例：
 
 ```
 [ApiVersion("1")]
 [ApiVersion("1.0-prerelease", Deprecated = true)]
 ```
 
-![Response headers](images/api-headers-example.PNG)
+![响应标头](images/api-headers-example.PNG)
 
-### API documentation / Swagger Update
-Be sure to make appropriate updates to swagger files and add new version checks where necessary. Information on where and
-how to do this is [here](./resources/swagger.md).
+### API 文档 / Swagger 更新
+请确保对 swagger 文件进行适当的更新，并在必要时添加新版本检查。有关在何处以及如何执行此操作的信息在[这里](./resources/swagger.md)。

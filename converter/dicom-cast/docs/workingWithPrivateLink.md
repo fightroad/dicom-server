@@ -1,26 +1,25 @@
-# Configuration steps for DICOM Cast to work with Private Link enabled DICOM
+# 为启用 Private Link 的 DICOM 配置 DICOM Cast
 
-1. Create a Virtual Network with two subnets within the same subscription and region as you would plan to create the Health Data Services Workspace.
-    1. Default subnet
-    2. Subnet delegated to Microsoft.containerinstance/containergroups
+1. 在计划创建 Health Data Services Workspace 的同一订阅和区域中创建虚拟网络，包含两个子网：
+    1. 默认子网
+    2. 委派给 Microsoft.containerinstance/containergroups 的子网  
 ![Alt text](image.png)
 
-2. Provision Health Data Services workspace, DICOM and FHIR in the same region.
-3. Enable Private Link to Health Data Service Workspace. This Private Link would use the Virtual Network created in step 1 and default subnet
+2. 在同一区域部署 Health Data Services workspace、DICOM 与 FHIR。
+3. 为 Health Data Service Workspace 启用 Private Link，使用步骤 1 创建的虚拟网络及默认子网。  
 ![Alt text](image-1.png)
 
-4. Use the template given [here](DicomcastDeploymentTemplate.md) to deploy DICOM Cast within a Virtual Network created in step 1. This will use the subnet that is delegated to Microsoft.containerinstance/containergroups as shown in picture in step 1. 
-5. Add the following role assignments to Health Data Service Workspace on container instances System Assigned Managed Identity. 
-    1. DICOM Data Owner 
-    2. FHIR Data Contributor   
+4. 使用[此模板](DicomcastDeploymentTemplate.md)在步骤 1 的虚拟网络中部署 DICOM Cast，使用委派给 Microsoft.containerinstance/containergroups 的子网（见步骤 1 图示）。
+5. 为容器实例的系统分配托管身份在 Health Data Service Workspace 中添加角色：
+    1. DICOM Data Owner
+    2. FHIR Data Contributor  
 ![Alt text](image-2.png)
 
-6. DICOM Cast needs to talk to table storage within the storage account for processing Change Feed. Enable Private Link to the storage account created as a part of template deployment in step 4. This Private Link should also be in same vnet and default subnet that is created in step 1. 
+6. DICOM Cast 处理 Change Feed 时需要访问存储账户的表存储。为步骤 4 部署时创建的存储账户启用 Private Link，该 Private Link 也应位于步骤 1 创建的同一 VNet 和默认子网。  
 ![Alt text](image-3.png)
 
-7. Disable public network access for the storage account (`Security + Networking` > `Networking` > `Firewalls and virtual networks` > `Public Network Acccess` > `Disabled`)
+7. 关闭存储账户的公共网络访问（`Security + Networking` > `Networking` > `Firewalls and virtual networks` > `Public Network Access` > `Disabled`）。
 
-8. Ensure all the fields mentioned here are populated in the key vault provisioned in step 4. https://github.com/microsoft/dicom-server/blob/main/docs/how-to-guides/sync-dicom-metadata-to-fhir.md#update-key-vault-for-dicom-cast 
+8. 确保步骤 4 中创建的 Key Vault 已填充此处要求的所有字段：https://github.com/microsoft/dicom-server/blob/main/docs/how-to-guides/sync-dicom-metadata-to-fhir.md#update-key-vault-for-dicom-cast
 
-9. Restart DICOM Cast container. It should be running successfully. 
-
+9. 重启 DICOM Cast 容器，确认正常运行。 

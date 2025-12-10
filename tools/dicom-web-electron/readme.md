@@ -1,44 +1,44 @@
 # DICOM Web Electron
 
-This tool is an Electron application used to interact with your Medical Imaging Server for DICOM. It currently has the ability to upload one or many `.dcm` files to a given server.
+Electron 应用，用于与 Medical Imaging Server for DICOM 交互，可上传单个或多个 `.dcm` 文件到指定服务器。
 
-## Prerequisites
+## 前置条件
 
-To use the DICOM Electron tool, install the latest version of Node JS. The installer is available at [here](https://nodejs.org/en/download/). This is only required the first time you launch the tool.
+首次使用需安装最新版 Node.js，安装包下载：[链接](https://nodejs.org/en/download/)。
 
-## Getting Started
+## 快速开始
 
-In a terminal window, navigate to the directory for your Electron Tool. Run the following commands to launch the tool:
+在终端进入本工具目录，运行：
 
-1. Run `npm install`
-2. Run `npm start`
+1. `npm install`
+2. `npm start`
 
-Once the Electron Tool launches, navigate to Server Settings. Select 'Change' to update the address of your DICOM Server.
+启动后进入 Server Settings，点击 “Change” 更新 DICOM 服务器地址。
 
-**NOTE**: If you deployed the DICOM Server through Azure, you can find the URL on the Overview page of the App Service.
+**注意**：若通过 Azure 部署，可在 App Service 的 Overview 页面找到 URL。
 
 ![Electron tool settings](images/electron-tool-settings.png)
 
-**NOTE**: If you have enabled Authentication settings, you can access your Bearer Token using the Azure CLI. Instructions are available [here](https://docs.microsoft.com/en-us/azure/healthcare-apis/get-healthcare-apis-access-token-cli) for a similar resource.
+**注意**：若启用了认证，可用 Azure CLI 获取 Bearer Token，参考[此文](https://docs.microsoft.com/en-us/azure/healthcare-apis/get-healthcare-apis-access-token-cli)。
 
-## Upload DICOM files to your server
+## 上传 DICOM 文件
 
-To upload files stored locally on your device, click 'Select File(s)'. You can upload multiple DICOM files at once to your server.
+点击 “Select File(s)” 选择本地文件，可一次上传多个 DICOM 文件。
 
-You can get sample DICOM files at [../../docs/dcms](../../docs/dcms)
+示例 DICOM 文件见 [../../docs/dcms](../../docs/dcms)
 
 ![Electron tool upload](images/electron-tool-upload.png)
 
 ## Change Feed
 
-The change feed offers the ability to go through the history of the Medical Imaging Server for DICOM and act upon the creates and deletes in the service. Learn more about Change Feed [here](https://github.com/microsoft/dicom-server/blob/main/docs/users/ChangeFeed.md).
+Change Feed 可遍历 DICOM 服务的历史并处理创建/删除事件，详见[文档](https://github.com/microsoft/dicom-server/blob/main/docs/users/ChangeFeed.md)。
 
-Navigate to Change Feed to update the Offset value, which is the number of records to skip before the values to return.
+在 Change Feed 页面可设置 Offset（跳过的记录数）。
 
-## Packaging
+## 打包
 
-The application is packed with [`electron-builder`](https://www.electron.build/)
+应用使用 [`electron-builder`](https://www.electron.build/) 打包。
 
-To package the application for Microsoft Windows you can run the following command:
+打包 Windows 版本运行：
 
 ```.\node_modules\.bin\electron-builder -w```

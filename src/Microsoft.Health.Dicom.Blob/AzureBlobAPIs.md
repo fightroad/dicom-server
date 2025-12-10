@@ -1,11 +1,10 @@
 ﻿# Azure Blob APIs
 
-This document provides some context on different Azure blob SDK apis. 
-https://github.com/Azure/azure-sdk-for-net/issues/22022
+本文档说明 Azure Blob SDK 中若干下载 API 的区别（参考：https://github.com/Azure/azure-sdk-for-net/issues/22022）。
 
-The `DownloadStreamingAsync` is replacement for `DownloadAsync`.
-Except slightly different return type please think about this as a rename or new alias for the same functionality.
-We've introduced `DownloadContentAsync` for scenarios where small sized blobs are used for formats supported by BinaryData type (e.g. json files) thus we wanted to rename existing API to make the download family less ambiguous.
+- `DownloadStreamingAsync` 是 `DownloadAsync` 的替代，除返回类型略有差别，可视作同功能的重命名/别名。
+- 新增 `DownloadContentAsync` 主要用于小文件（如 JSON）并返回 `BinaryData`，便于区分下载 API。
 
-The difference between `DownloadStreamingAsync` and `OpenReadAsync` is that the former gives you a network stream (wrapped with few layers but effectively think about it as network stream) which holds on to single connection, the later on the other hand fetches payload in chunks and buffers issuing multiple requests to fetch content.
-Picking one over the other one depends on the scenario, i.e. if the consuming code is fast and you have good broad network link to storage account then former might be better choice as you avoid multiple req-res exchanges but if the consumer is slow then later might be a good idea as it releases a connection back to the pool right after reading and buffering next chunk. We recommend to perf test your app with both to reveal which is best choice if it's not obvious.
+`DownloadStreamingAsync` 与 `OpenReadAsync` 的差异：
+- 前者提供网络流（保持单个连接）；后者分块拉取并缓冲，会发起多次请求。
+- 如果消费端处理很快且网络带宽好，前者可减少往返；如果消费端较慢，后者能在读完并缓冲下一块后归还连接，可能更合适。建议两种方式都做性能测试以确定最佳选择。

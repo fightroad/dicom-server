@@ -1,50 +1,50 @@
-# Deploy the Medical Imaging Server for DICOM locally using Docker
+# 使用 Docker 本地部署 Medical Imaging Server for DICOM
 
-This quickstart guide details how to build and run the Medical Imaging Server for DICOM in Docker. By using Docker Compose, all of the necessary dependencies are started automatically in containers without requiring any installations on your development machine. In particular, the Medical Imaging Server for DICOM in Docker starts a container for [SQL Server](https://docs.microsoft.com/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15&pivots=cs1-bash) and the Azure Storage emulator called [Azurite](https://github.com/Azure/Azurite).
+本快速入门指南详细介绍了如何在 Docker 中构建和运行 Medical Imaging Server for DICOM。通过使用 Docker Compose，所有必要的依赖项都会在容器中自动启动，无需在开发机器上安装任何内容。特别是，Docker 中的 Medical Imaging Server for DICOM 会为 [SQL Server](https://docs.microsoft.com/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15&pivots=cs1-bash) 和名为 [Azurite](https://github.com/Azure/Azurite) 的 Azure 存储模拟器启动容器。
 
-> **IMPORTANT**
+> **重要提示**
 >
-> This sample has been created to enable Development/Test scenarios and is not suitable for production scenarios. Passwords are contained in deployment files, the SQL server connection is not encrypted, authentication on the Medical Imaging Server for DICOM has been disabled, and data is not persisted between container restarts.
+> 此示例已创建用于启用开发/测试场景，不适合生产场景。密码包含在部署文件中，SQL 服务器连接未加密，Medical Imaging Server for DICOM 上的身份验证已禁用，数据在容器重启之间不会持久化。
 
-## Visual Studio (DICOM Server Only)
+## Visual Studio（仅 DICOM 服务器）
 
-You can easily run and debug the Medical Imaging Server for DICOM right from Visual Studio. Simply open up the solution file *Microsoft.Health.Dicom.sln* in Visual Studio 2019 (or later) and run the "docker-compose" project. This should build each of the images and run the containers locally without any additional action.
+您可以直接从 Visual Studio 轻松运行和调试 Medical Imaging Server for DICOM。只需在 Visual Studio 2019（或更高版本）中打开解决方案文件 *Microsoft.Health.Dicom.sln* 并运行 "docker-compose" 项目。这应该构建每个镜像并在本地运行容器，无需任何额外操作。
 
-Once it's ready, a web page should open automatically for the URL `https://localhost:8080` where you can communicate with the Medical Imaging Server for DICOM.
+准备就绪后，应该会自动打开 URL `https://localhost:8080` 的网页，您可以在其中与 Medical Imaging Server for DICOM 通信。
 
-## Command Line
+## 命令行
 
-Run the following command from the root of the `microsoft/dicom-server` repository, replacing `<SA_PASSWORD>` with your chosen password (be sure to follow the [SQL Server password complexity requirements](https://docs.microsoft.com/sql/relational-databases/security/password-policy?view=sql-server-ver15#password-complexity)):
+从 `microsoft/dicom-server` 存储库的根目录运行以下命令，将 `<SA_PASSWORD>` 替换为您选择的密码（请确保遵循 [SQL Server 密码复杂性要求](https://docs.microsoft.com/sql/relational-databases/security/password-policy?view=sql-server-ver15#password-complexity)）：
 
 ```bash
 docker-compose -p healthcare -f docker/docker-compose.yml up --build -d
 ```
 
-If you wish to specify your own SQL admin password, you can include one as well:
+如果您希望指定自己的 SQL 管理员密码，也可以包含一个：
 
 ```bash
 env SAPASSWORD='<SA_PASSWORD>' docker-compose -p healthcare -f docker/docker-compose.yml up --build -d
 ```
 
-Once deployed the Medical Imaging Server for DICOM should be available at `http://localhost:8080/`.
+部署后，Medical Imaging Server for DICOM 应该在 `http://localhost:8080/` 可用。
 
-### Including DICOMcast
+### 包含 DICOMcast
 
-If you also want to include DICOMcast, simply add one more file to the `docker-compose up` command:
+如果您还想包含 DICOMcast，只需在 `docker-compose up` 命令中添加一个文件：
 
 ```bash
 docker-compose -p healthcare -f docker/docker-compose.yml -f docker/docker-compose.cast.yml up --build -d
 ```
 
-### Run in Docker with a custom configuration
+### 使用自定义配置在 Docker 中运行
 
-To build the `dicom-server` image run the following command from the root of the `microsoft/dicom-server`repository:
+要构建 `dicom-server` 镜像，请从 `microsoft/dicom-server` 存储库的根目录运行以下命令：
 
 ```bash
 docker build -f src/microsoft.health.dicom.web/Dockerfile -t dicom-server .
 ```
 
-When running the container, additional configuration details can also be specified such as:
+运行容器时，还可以指定其他配置详细信息，例如：
 
 ```bash
 docker run -d \
@@ -57,27 +57,27 @@ docker run -d \
     dicom-server
 ```
 
-## Connecting to Dependencies
+## 连接到依赖项
 
-By default, the storage services like `azurite` and `sql` are not exposed locally, but you may connect to them directly by uncommenting the `ports` element in the `docker-compose.yml` file. Be sure those ports aren't already in-use locally! Without changing the values, the following ports are used:
-* SQL Server exposes a TCP connection on port `1433`
-  * In a SQL connection string, use `localhost:1433` or even `tcp:(local)`
-* Azurite, the Azure Storage Emulator, exposes the blob service on port `10000`, the queue service on port `10001`, and the table service on port `10002`
-  * The emulator uses a well-defined [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#connect-to-the-emulator-account-using-the-well-known-account-name-and-key)
-  * Use [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/) to browse its contents
-* [FHIR](https://github.com/microsoft/fhir-server) can be accessible via `http://localhost:8081`
+默认情况下，`azurite` 和 `sql` 等存储服务不会在本地公开，但您可以通过取消注释 `docker-compose.yml` 文件中的 `ports` 元素直接连接到它们。确保这些端口在本地未被使用！在不更改值的情况下，使用以下端口：
+* SQL Server 在端口 `1433` 上公开 TCP 连接
+  * 在 SQL 连接字符串中，使用 `localhost:1433` 或 `tcp:(local)`
+* Azurite（Azure 存储模拟器）在端口 `10000` 上公开 blob 服务，在端口 `10001` 上公开队列服务，在端口 `10002` 上公开表服务
+  * 模拟器使用明确定义的[连接字符串](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#connect-to-the-emulator-account-using-the-well-known-account-name-and-key)
+  * 使用 [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/) 浏览其内容
+* [FHIR](https://github.com/microsoft/fhir-server) 可以通过 `http://localhost:8081` 访问
 
-You can also connect to them via their IP address rather rather than via localhost. The following command will help you understand the IPs and ports by which the services are exposed:
+您也可以通过它们的 IP 地址而不是通过 localhost 连接到它们。以下命令将帮助您了解服务公开的 IP 和端口：
 
 ```bash
 docker inspect -f 'Name: {{.Name}} - IPs: {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} - Ports: {{.Config.ExposedPorts}}' $(docker ps -aq)
 ```
 
-## Next steps
+## 后续步骤
 
-Once deployment is complete you can access your Medical Imaging Server at `https://localhost:8080`. Make sure to specify the version as part of the url when making requests. More information can be found in the [Api Versioning Documentation](../api-versioning.md)
+部署完成后，您可以在 `https://localhost:8080` 访问 Medical Imaging Server。发出请求时，请确保在 URL 中指定版本。更多信息可以在 [API 版本控制文档](../api-versioning.md) 中找到
 
-* [Use Medical Imaging Server for DICOM APIs](../tutorials/use-the-medical-imaging-server-apis.md)
-* [Upload DICOM files via the Electron Tool](../../tools/dicom-web-electron)
-* [Enable Azure AD Authentication](../how-to-guides/enable-authentication-with-tokens.md)
-* [Enable Identity Server Authentication](../development/identity-server-authentication.md)
+* [使用 Medical Imaging Server for DICOM API](../tutorials/use-the-medical-imaging-server-apis.md)
+* [通过 Electron 工具上传 DICOM 文件](../../tools/dicom-web-electron)
+* [启用 Azure AD 身份验证](../how-to-guides/enable-authentication-with-tokens.md)
+* [启用 Identity Server 身份验证](../development/identity-server-authentication.md)

@@ -1,57 +1,56 @@
-# Frequently asked questions about the Medical Imaging Server for DICOM
+# Medical Imaging Server for DICOM 常见问题
 
-## What is the Medical Imaging Server for DICOM?
+## Medical Imaging Server for DICOM 是什么？
 
-The Medical Imaging Server for DICOM is an open source DICOMweb&trade; server that is easily deployed on Azure. It allows standards-based communication with any DICOMweb&trade;  enabled systems for data exchange, and introduces integration between DICOM and FHIR.  The server identifies and extracts DICOM metadata and injects it into a FHIR endpoint (such as the Azure API for FHIR or FHIR Server for Azure) to create a holistic view of patient data.
+Medical Imaging Server for DICOM 是一个开源的 DICOMweb&trade; 服务器，可轻松部署到 Azure。它允许与任何支持 DICOMweb&trade; 的系统进行基于标准的通信以进行数据交换，并引入 DICOM 和 FHIR 之间的集成。服务器识别并提取 DICOM 元数据，并将其注入到 FHIR 端点（如 Azure API for FHIR 或 FHIR Server for Azure）中，以创建患者数据的整体视图。
 
-## What are the key requirements to use the Medical Imaging Server for DICOM?
+## 使用 Medical Imaging Server for DICOM 的关键要求是什么？
 
-The Medical Imaging Server for DICOM needs an Azure subscription to configure and run the required components. These components are, by default, created inside of an existing or new Azure Resource Group to simplify management. Additionally, an Azure Active Directory account is required.
+Medical Imaging Server for DICOM 需要 Azure 订阅来配置和运行所需的组件。默认情况下，这些组件在现有或新的 Azure 资源组中创建，以简化管理。此外，还需要 Azure Active Directory 帐户。
 
-## Where is the data persisted using the Medical Imaging Server for DICOM?
+## 使用 Medical Imaging Server for DICOM 的数据存储在哪里？
 
-The customer controls all of the data persisted by the Medical Imaging Server for DICOM. The following components are used to persist data:
-- Blob storage: persists all DICOM data and metadata
-- Azure SQL: indexes a subset of the DICOM metadata to support queries, and maintains a queryable log of changes
-- Azure Key Vault: stores critical security information
+客户控制 Medical Imaging Server for DICOM 持久化的所有数据。以下组件用于持久化数据：
+- Blob 存储：持久化所有 DICOM 数据和元数据
+- Azure SQL：索引 DICOM 元数据的子集以支持查询，并维护可查询的变更日志
+- Azure Key Vault：存储关键安全信息
 
-## What data formats are compatible with the Medical Imaging Server for DICOM?
+## 哪些数据格式与 Medical Imaging Server for DICOM 兼容？
 
-The Medical Imaging Server for DICOM exposes a REST API that is compatible with the [DICOMweb&trade; Standards](https://www.dicomstandard.org/dicomweb/)specified and maintained by NEMA.
+Medical Imaging Server for DICOM 公开了一个与 NEMA 指定和维护的 [DICOMweb&trade; 标准](https://www.dicomstandard.org/dicomweb/) 兼容的 REST API。
 
-The server does not support DICOM DIMSE, which works primarily over a local area network and is unsuited for modern internet-based APIs. DIMSE is an incredibly popular standard used by nearly all medical imaging devices to communicate with other components of a provider’s medical imaging solution, such as PACS (Picture Archiving and Communication Systems) and medical imaging viewers. However, many modern systems, especially PACS and  viewers, have begun to also support the related (and compatible) DICOMweb&trade; Standard. For those systems which only speak DICOM DIMSE there are adapters available which allow for seamless communication between the local DIMSE-supporting systems and the Medical Imaging Server for DICOM.
+服务器不支持 DICOM DIMSE，它主要在局域网上工作，不适合现代基于互联网的 API。DIMSE 是一个非常流行的标准，几乎所有医学影像设备都使用它来与医疗提供者的医学影像解决方案的其他组件（如 PACS（图片存档和通信系统）和医学影像查看器）进行通信。然而，许多现代系统，特别是 PACS 和查看器，已经开始支持相关（且兼容）的 DICOMweb&trade; 标准。对于仅支持 DICOM DIMSE 的系统，有适配器可用于在本地支持 DIMSE 的系统与 Medical Imaging Server for DICOM 之间实现无缝通信。
 
-## What version of DICOM does the Medical Imaging Server for DICOM support?
+## Medical Imaging Server for DICOM 支持什么版本的 DICOM？
 
-The DICOM standards has been fixed at version 3.0 since 1993. However, the standard continues to add both breaking and non-breaking changes through various workgroups.
+DICOM 标准自 1993 年以来一直固定在版本 3.0。但是，该标准继续通过各种工作组添加破坏性和非破坏性变更。
 
-No single product, including the Medical Imaging Server for DICOM, fully supports the DICOM standard. Instead, each product includes a DICOM Conformance document that specifies exactly what is supported. (Unsupported features are traditionally not called out explicitly.) The Conformance document is available [here](conformance-statement.md).
+没有一个产品，包括 Medical Imaging Server for DICOM，完全支持 DICOM 标准。相反，每个产品都包含一个 DICOM 符合性文档，该文档明确指定了支持的内容。（传统上不明确说明不支持的功能。）符合性文档可在[这里](conformance-statement.md)找到。
 
-## What is REST API versioning in the Medical Imaging Server for DICOM?
+## Medical Imaging Server for DICOM 中的 REST API 版本控制是什么？
 
-The Medical Imaging Server for DICOM has versions for the REST API used to access the server. The version is specified as a URL path in the requests. For more information visit the [Api Versioning Documentation](../api-versioning.md).
+Medical Imaging Server for DICOM 具有用于访问服务器的 REST API 版本。版本在请求中指定为 URL 路径。有关更多信息，请访问 [API 版本控制文档](../api-versioning.md)。
 
-## Does the Medical Imaging Server for DICOM store any PHI?
+## Medical Imaging Server for DICOM 是否存储任何 PHI？
 
-Absolutely. One of the core objectives for the Medical Imaging Server for DICOM is to support standard and innovating radiologist workflows. These workflows demand the use of PHI data.
+绝对是的。Medical Imaging Server for DICOM 的核心目标之一是支持标准和创新的放射科医生工作流。这些工作流需要使用 PHI 数据。
 
-## How does the Medical Imaging Server for DICOM maitain privacy and security?
+## Medical Imaging Server for DICOM 如何维护隐私和安全？
 
-Trust, data privacy, and security are the highest priority for Microsoft and remain fundamental to managing PHI data in the cloud. The Medical Imaging Server for DICOM is designed to support security and privacy. The OSS code maps structured metadata from DICOM images to the FHIR data framework which allows for downstream exchange of data via FHIR APIS.
+信任、数据隐私和安全是 Microsoft 的最高优先级，并且仍然是管理云中 PHI 数据的基础。Medical Imaging Server for DICOM 旨在支持安全性和隐私。OSS 代码将 DICOM 图像的结构化元数据映射到 FHIR 数据框架，允许通过 FHIR API 进行下游数据交换。
 
-Microsoft Azure offers a comprehensive set of offerings to help your organization comply with national, regional, and industry-specific requirements governing the collection and use of data. [Learn more about Azure compliance](https://azure.microsoft.com/overview/trusted-cloud/compliance/).
+Microsoft Azure 提供了一套全面的产品，帮助您的组织遵守管理数据收集和使用的国家、地区和特定行业的要求。[了解有关 Azure 合规性的更多信息](https://azure.microsoft.com/overview/trusted-cloud/compliance/)。
 
-## What is DICOM?
+## DICOM 是什么？
 
-DICOM (Digital Imaging and Communications in Medicine) is the international standard to transmit, store, retrieve, print, process, and display medical imaging information, and is the primary medical imaging standard accepted across healthcare. Although some exceptions exist (dentistry, veterinary), nearly all medical specialties, equipment manufacturers, software vendors and individual practitioners rely on DICOM at some stage of any medical workflow involving imaging. DICOM ensures that medical images meet quality standards, so that the accuracy of diagnosis can be preserved. Most imaging modalities, including CT, MRI and ultrasound must conform to the DICOM standards. Images that are in the DICOM format need to be accessed and used through specialized DICOM applications.
+DICOM（医学数字成像和通信）是传输、存储、检索、打印、处理和显示医学影像信息的国际标准，是医疗保健领域接受的主要医学影像标准。尽管存在一些例外（牙科、兽医），但几乎所有医学专业、设备制造商、软件供应商和个人从业者在涉及影像的任何医疗工作流程的某个阶段都依赖 DICOM。DICOM 确保医学影像符合质量标准，从而可以保持诊断的准确性。大多数影像模式，包括 CT、MRI 和超声，都必须符合 DICOM 标准。DICOM 格式的图像需要通过专门的 DICOM 应用程序访问和使用。
 
+## 检索、查询和存储之间的区别是什么？
 
-## What is the difference between Retrieve, Query & Store?
+查询、检索和存储是标准的 DICOMweb&trade; 动词。查询 (QIDO) 搜索 DICOM 对象。QIDO 使您能够按患者 ID 搜索研究、序列和实例。检索 (WADO) 使您能够通过引用检索特定的研究、序列和实例。存储 (STOW-RS) 使您能够将特定实例存储到 DICOM 服务器。
 
-Query, Retrieve, and store are standard DICOMweb&trade; verbs. Query (QIDO) searches for DICOM objects. QIDO enables you to search for studies, series and instances by patient ID. Retrieve (WADO) enables you to retrieve specific studies, series and instances by reference. Store (STOW-RS) enables you to store specific instances to a DICOM server.
+您可以从 [DICOMweb&trade;](https://www.dicomstandard.org/dicomweb) 了解更多关于 QIDO、WADO 和 STOW 的详细信息。
 
-You can learn more about the specifics of QIDO, WADO and STOW from [DICOMweb&trade;](https://www.dicomstandard.org/dicomweb).
+## 支持哪些版本的 .NET？
 
-## What versions of .NET are Supported?
-
-The web server always supports the latest .NET version, whether it is a Standard Term Support (STS) or Long Term Support (LTS) version. The Azure Functions on the other hand, used to execute long-running operations, support the latest LTS version of .NET as per the support provided the Azure Functions framework. The Medical Imaging Server for DICOM docker images always include the necessary runtime components.
+Web 服务器始终支持最新的 .NET 版本，无论是标准期限支持 (STS) 还是长期支持 (LTS) 版本。另一方面，用于执行长时间运行操作的 Azure Functions 根据 Azure Functions 框架提供的支持，支持最新的 LTS 版本的 .NET。Medical Imaging Server for DICOM docker 镜像始终包含必要的运行时组件。

@@ -1,32 +1,32 @@
-# Contributing to Medical Imaging Server for DICOM
+# 参与贡献指南（Medical Imaging Server for DICOM）
 
-This document describes guidelines for contributing to the Medical Imaging Server for DICOM repo.
+本文档说明如何为 Medical Imaging Server for DICOM 仓库贡献代码。
 
-## Submitting Pull Requests
+## 提交 Pull Request
 
-- **DO** submit all changes via pull requests (PRs). They will be reviewed and potentially be merged by maintainers after a peer review that includes at least one of the team members.
-- **DO** give PRs short but descriptive names.
-- **DO** write a useful but brief description of what the PR is for.
-- **DO** refer to any relevant issues and use [keywords](https://help.github.com/articles/closing-issues-using-keywords/) that automatically close issues when the PR is merged.
-- **DO** ensure each commit successfully builds. The entire PR must pass all checks before it will be merged.
-- **DO** address PR feedback in additional commits instead of amending.
-- **DO** assume that [Squash and Merge](https://blog.github.com/2016-04-01-squash-your-commits/) will be used to merge the commits unless specifically requested otherwise.
-- **DO NOT** submit "work in progress" PRs. A PR should only be submitted when it is considered ready for review.
-- **DO NOT** leave PRs active for more than 4 weeks without a commit. Stale PRs will be closed until they are ready for active development again.
-- **DO NOT** mix independent and unrelated changes in one PR.
+- **请务必** 通过 PR 提交变更，至少一名团队成员会进行同行评审并决定合入。
+- **请务必** 为 PR 取简洁且有描述性的标题。
+- **请务必** 撰写简要且有价值的 PR 描述。
+- **请务必** 关联相关 issue，并使用可自动关闭 issue 的[关键词](https://help.github.com/articles/closing-issues-using-keywords/)。
+- **请务必** 确保每个提交都能成功构建，整个 PR 需通过全部检查才会被合并。
+- **请务必** 用额外提交响应评审意见，而非改写已有提交。
+- **默认** 使用 [Squash and Merge](https://blog.github.com/2016-04-01-squash-your-commits/) 合并，除非另有要求。
+- **请勿** 提交“进行中”PR，仅在准备好评审时提交。
+- **请勿** 让 PR 超过 4 周无提交地保持打开，陈旧 PR 会被关闭，待恢复开发再重新提交。
+- **请勿** 在同一个 PR 混入无关的独立变更。
 
-## Coding Style
+## 代码风格
 
-The coding style is enforced through [.NET analyzers](https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/overview) and an [.editorconfig](.editorconfig) file. Contributors should ensure these guidelines are followed when making submissions.
+代码风格由 [.NET 分析器](https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/overview) 和 [.editorconfig](.editorconfig) 强制约束，提交前请遵循：
 
-- **DO** address the .NET analyzer errors.
-- **DO** follow the [.editorconfig](.editorconfig) settings.
+- **请务必** 处理 .NET 分析器报错。
+- **请务必** 遵循 [.editorconfig](.editorconfig) 设置。
 
-## Creating Issues
+## 创建 Issue
 
-- **DO** use a descriptive title that identifies the issue or the requested feature.
-- **DO** write a detailed description of the issue or the requested feature.
-- **DO** provide details for issues you create:
-  - Describe the expected and actual behavior.
-  - Provide any relevant exception message or OperationOutcome.
-- **DO** subscribe to notifications for created issues in case there are any follow-up questions.
+- **请务必** 使用能清晰识别问题或需求的标题。
+- **请务必** 撰写详细的问题或需求描述。
+- **请务必** 提供以下细节：
+  - 期望行为与实际行为。
+  - 相关的异常信息或 OperationOutcome。
+- **请务必** 订阅所创建 issue 的通知，便于跟进交流。

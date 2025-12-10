@@ -1,36 +1,36 @@
-# DICOM Events
+# DICOM 事件
 
-Events are a notification and subscription feature in the Azure Health Data Services. Events enable customers to utilize and enhance the analysis and workflows of Digital Imaging and Communications in Medicine (DICOM) images. When DICOM image changes are successfully written to the Azure Health Data Services, the Events feature sends notification messages to Events subscribers. These event notification occurrences can be sent to multiple endpoints to trigger automation ranging from starting workflows to sending email and text messages to support the changes occurring from the health data it originated from. The Events feature integrates with the Azure Event Grid service and creates a system topic for the Azure Health Data Services Workspace.
+事件是 Azure Health Data Services 中的通知和订阅功能。事件使客户能够利用和增强医学数字成像和通信 (DICOM) 图像的分析和工作流。当 DICOM 图像更改成功写入 Azure Health Data Services 时，事件功能会向事件订阅者发送通知消息。这些事件通知可以发送到多个端点，以触发自动化，从启动工作流到发送电子邮件和短信，以支持源自健康数据的更改。事件功能与 Azure Event Grid 服务集成，并为 Azure Health Data Services 工作区创建系统主题。
 
-## Event types:
+## 事件类型：
 
-DicomImageCreated - The event emitted after a DICOM image gets created successfully.
+DicomImageCreated - DICOM 图像成功创建后发出的事件。
 
-DicomImageDeleted - The event emitted after a DICOM image gets deleted successfully.
+DicomImageDeleted - DICOM 图像成功删除后发出的事件。
 
-## Event message structure:
+## 事件消息结构：
 
-|Name | Type | Required	| Description
+|名称 | 类型 | 必需	| 描述
 |-----|------|----------|-----------|
-|topic	| string	| Yes	| The topic is the Azure Resource ID of your Azure Health Data Services workspace.
-|subject | string | Yes | The Uniform Resource Identifier (URI) of the DICOM image that was changed. Customer can access the image with the subject with https:// scheme. Customer should use the dataVersion or data.resourceVersionId to visit specific data version regarding this event.
-| eventType	| string(enum)	| Yes	| The type of change on the DICOM image.
-| eventTime	| string(datetime)	| Yes	| The UTC time when the DICOM image change was committed.
-| id	| string	| Yes	| Unique identifier for the event.
-| data	| object	| Yes	| DICOM image change event details.
-| data.imageStudyInstanceUid	| string	| Yes | The image's Study Instance UID
-| data.imageSeriesInstanceUid	| string	| Yes	| The image's Series Instance UID
-| data.imageSopInstanceUid	| string	| Yes	| The image's SOP Instance UID
-| data.serviceHostName	| string	| Yes	| The hostname of the dicom service where the change occurred. 
-| data.sequenceNumber	| int	| Yes	| The sequence number of the change in the DICOM service. Every image creation and deletion will have a unique sequence within the service. This number correlates to the sequence number of the DICOM service's Change Feed. Querying the DICOM Service Change Feed with this sequence number will give you the change that created this event.
-| dataVersion	| string	| No	| The data version of the DICOM image
-| metadataVersion	| string	| No	| The schema version of the event metadata. This is defined by Azure Event Grid and should be constant most of the time.
+|topic	| string	| 是	| 主题是 Azure Health Data Services 工作区的 Azure 资源 ID。
+|subject | string | 是 | 已更改的 DICOM 图像的统一资源标识符 (URI)。客户可以使用带有 https:// 方案的主题访问图像。客户应使用 dataVersion 或 data.resourceVersionId 访问与此事件相关的特定数据版本。
+| eventType	| string(enum)	| 是	| DICOM 图像上的更改类型。
+| eventTime	| string(datetime)	| 是	| 提交 DICOM 图像更改的 UTC 时间。
+| id	| string	| 是	| 事件的唯一标识符。
+| data	| object	| 是	| DICOM 图像更改事件详细信息。
+| data.imageStudyInstanceUid	| string	| 是 | 图像的 Study Instance UID
+| data.imageSeriesInstanceUid	| string	| 是	| 图像的 Series Instance UID
+| data.imageSopInstanceUid	| string	| 是	| 图像的 SOP Instance UID
+| data.serviceHostName	| string	| 是	| 发生更改的 dicom 服务的主机名。 
+| data.sequenceNumber	| int	| 是	| DICOM 服务中更改的序列号。每个图像创建和删除在服务中都有一个唯一的序列。此数字与 DICOM 服务的 Change Feed 的序列号相关联。使用此序列号查询 DICOM 服务 Change Feed 将为您提供创建此事件的更改。
+| dataVersion	| string	| 否	| DICOM 图像的数据版本
+| metadataVersion	| string	| 否	| 事件元数据的架构版本。这由 Azure Event Grid 定义，大多数时候应该是常量。
 
-## Samples
+## 示例
 
 ## Microsoft.HealthcareApis.DicomImageCreated
 
-### Event Grid Schema
+### Event Grid 架构
 
 ```
 {
@@ -51,7 +51,7 @@ DicomImageDeleted - The event emitted after a DICOM image gets deleted successfu
 }
 ```
 
-### Cloud Events Schema
+### Cloud Events 架构
 
 ```
 {
@@ -73,7 +73,7 @@ DicomImageDeleted - The event emitted after a DICOM image gets deleted successfu
 
 ## Microsoft.HealthcareApis.DicomImageDeleted
 
-### Event Grid Schema
+### Event Grid 架构
 
 ```
 {
@@ -94,7 +94,7 @@ DicomImageDeleted - The event emitted after a DICOM image gets deleted successfu
 }
 ```
 
-### Cloud Events Schema
+### Cloud Events 架构
 
 ```
 {
@@ -114,40 +114,40 @@ DicomImageDeleted - The event emitted after a DICOM image gets deleted successfu
 }
 ```
 
-## FAQs
+## 常见问题
 
-### Can I use Events with a different DICOM service other than the Azure Health Data Services DICOM service?
-No. The Azure Health Data Services Events feature only currently supports the Azure Health Data Services DICOM service.
+### 我可以将事件与 Azure Health Data Services DICOM 服务以外的其他 DICOM 服务一起使用吗？
+不可以。Azure Health Data Services 事件功能目前仅支持 Azure Health Data Services DICOM 服务。
 
-### What DICOM image events does Events support?
-Events are generated from the following DICOM service types:
+### 事件支持哪些 DICOM 图像事件？
+事件从以下 DICOM 服务类型生成：
 
-DicomImageCreated - The event emitted after a DICOM image gets created successfully.
+DicomImageCreated - DICOM 图像成功创建后发出的事件。
 
-DicomImageDeleted - The event emitted after a DICOM image gets deleted successfully.
+DicomImageDeleted - DICOM 图像成功删除后发出的事件。
 
-### What is the payload of an Events message?
-For a detailed description of the Events message structure and both required and non-required elements, see the `Event message structure` section.
+### 事件消息的有效负载是什么？
+有关事件消息结构以及必需和非必需元素的详细描述，请参阅 `事件消息结构` 部分。
 
-### What is the throughput for the Events messages?
-The throughput of DICOM events is governed by the throughput of the DICOM service and the Event Grid. When a request made to the DICOM service is successful, it will return a 2xx HTTP status code. It will also generate a DICOM image changing event. The current limitation is 5,000 events/second per a workspace for all DICOM service instances in it.
+### 事件消息的吞吐量是多少？
+DICOM 事件的吞吐量由 DICOM 服务和 Event Grid 的吞吐量决定。当对 DICOM 服务的请求成功时，它将返回 2xx HTTP 状态代码。它还会生成 DICOM 图像更改事件。当前限制是每个工作区中所有 DICOM 服务实例每秒 5,000 个事件。
 
-### How am I charged for using Events?
-There are no extra charges for using Azure Health Data Services Events. However, applicable charges for the Event Grid will be assessed against your Azure subscription.
+### 使用事件如何收费？
+使用 Azure Health Data Services 事件不收取额外费用。但是，Event Grid 的适用费用将计入您的 Azure 订阅。
 
-### How do I subscribe to multiple DICOM services in the same workspace separately?
-You can use the Event Grid filtering feature. There are unique identifiers in the event message payload to differentiate different accounts and workspaces. You can find a global unique identifier for workspace in the source field, which is the Azure Resource ID. You can locate the unique DICOM account name in that workspace in the `data.serviceHostName` field. When you create a subscription, you can use the filtering operators to select the events you want to get in that subscription.
+### 如何分别订阅同一工作区中的多个 DICOM 服务？
+您可以使用 Event Grid 过滤功能。事件消息有效负载中有唯一标识符来区分不同的帐户和工作区。您可以在源字段中找到工作区的全局唯一标识符，这是 Azure 资源 ID。您可以在 `data.serviceHostName` 字段中找到该工作区中的唯一 DICOM 帐户名称。创建订阅时，可以使用过滤运算符选择要在该订阅中获取的事件。
 
-### Can I use the same subscriber for multiple workspaces or multiple DICOM accounts?
-Yes. We recommend that you use different subscribers for each individual DICOM account to process in isolated scopes.
+### 我可以将同一订阅者用于多个工作区或多个 DICOM 帐户吗？
+可以。我们建议您为每个单独的 DICOM 帐户使用不同的订阅者，以便在隔离的范围内处理。
 
-### Is Event Grid compatible with HIPAA and HITRUST compliance obligations?
-Yes. Event Grid supports customer's Health Insurance Portability and Accountability Act (HIPAA) and Health Information Trust Alliance (HITRUST) obligations. For more information, see Microsoft Azure Compliance Offerings.
+### Event Grid 是否与 HIPAA 和 HITRUST 合规性义务兼容？
+是的。Event Grid 支持客户的健康保险流通与责任法案 (HIPAA) 和健康信息信任联盟 (HITRUST) 义务。有关更多信息，请参阅 Microsoft Azure 合规性产品。
 
-### What is the expected time to receive an Events message?
-On average, you should receive your event message within ten seconds after a successful HTTP request. 99.99% of the event messages should be delivered within twenty seconds unless the limitation of either the DICOM service or Event Grid has been met.
+### 接收事件消息的预期时间是多少？
+平均而言，您应该在成功的 HTTP 请求后十秒内收到事件消息。99.99% 的事件消息应在二十秒内送达，除非达到 DICOM 服务或 Event Grid 的限制。
 
-### Is it possible to receive duplicate Events message?
-Yes. The Event Grid guarantees at least one Events message delivery with its push mode. There may be chances that the event delivery request returns with a transient failure status code for random reasons. In this situation, the Event Grid will consider that as a delivery failure and will resend the Events message. For more information, see Azure Event Grid delivery and retry.
+### 是否可能收到重复的事件消息？
+是的。Event Grid 保证至少一次事件消息传递（推送模式）。由于随机原因，事件传递请求可能会返回瞬态失败状态代码。在这种情况下，Event Grid 会将其视为传递失败并重新发送事件消息。有关更多信息，请参阅 Azure Event Grid 传递和重试。
 
-Generally, we recommend that developers ensure idempotency for the event subscriber. The event ID or the combination of all fields in the data property of the message content are unique per each event. The developer can rely on them to de-duplicate.
+通常，我们建议开发人员确保事件订阅者的幂等性。事件 ID 或消息内容数据属性中所有字段的组合对于每个事件都是唯一的。开发人员可以依靠它们进行去重。

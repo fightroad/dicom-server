@@ -1,20 +1,20 @@
-# Azure Active Directory Authentication
+# Azure Active Directory 身份验证
 
-This How-to Guide shows you how to configure the authentication settings for the Medical Imaging Server for DICOM through Azure. To complete this configuration, you will:
+本操作指南向您展示如何通过 Azure 配置 Medical Imaging Server for DICOM 的身份验证设置。要完成此配置，您将：
 
-1. **Create a resource application in Azure AD**: This resource application will be a representation of the Medical Imaging Server for DICOM that can be used to authenticate and obtain tokens. In order for an application to interact with Azure AD, it needs to be registered.
-1. **Provide app registration details to your Medical Imaging Server for DICOM**: Once the resource application is registered, you will set the authentication of your Medical Imaging Server for DICOM App Service.
-1. **Create a service client application in Azure AD**: Client application registrations are Azure AD representations of applications that can be used to authenticate and obtain tokens. A service client is intended to be used by an application to obtain an access token without interactive authentication of a user. It will have certain application permissions and use an application secret (password) when obtaining access tokens.
-1. **Retrieve Access Token via Postman or Azure CLI**: With your service client application enabled, you can obtain an access token to authenticate your application.
+1. **在 Azure AD 中创建资源应用程序**：此资源应用程序将是 Medical Imaging Server for DICOM 的表示，可用于身份验证和获取令牌。应用程序要与 Azure AD 交互，需要注册。
+2. **向 Medical Imaging Server for DICOM 提供应用注册详细信息**：注册资源应用程序后，您将设置 Medical Imaging Server for DICOM App Service 的身份验证。
+3. **在 Azure AD 中创建服务客户端应用程序**：客户端应用程序注册是可用于身份验证和获取令牌的应用程序的 Azure AD 表示。服务客户端旨在供应用程序使用，以在没有用户交互式身份验证的情况下获取访问令牌。它将具有某些应用程序权限，并在获取访问令牌时使用应用程序机密（密码）。
+4. **通过 Postman 或 Azure CLI 检索访问令牌**：启用服务客户端应用程序后，您可以获取访问令牌以对应用程序进行身份验证。
 
-## Prerequisites
+## 先决条件
 
-1. Deploy a [Medical Imaging Server for DICOM to Azure](../quickstarts/deploy-via-azure.md).
-1. This tutorial requires an Azure AD tenant. If you have not created a tenant, see [Create a new tenant in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-access-create-new-tenant).
+1. 将 [Medical Imaging Server for DICOM 部署到 Azure](../quickstarts/deploy-via-azure.md)。
+2. 本教程需要 Azure AD 租户。如果您尚未创建租户，请参阅[在 Azure Active Directory 中创建新租户](https://docs.microsoft.com/azure/active-directory/fundamentals/active-directory-access-create-new-tenant)。
 
-## Authentication Settings Overview
+## 身份验证设置概述
 
-The current authentication settings exposed in configuration are the following:
+配置中公开的当前身份验证设置如下：
 
 ```json
 
@@ -31,75 +31,75 @@ The current authentication settings exposed in configuration are the following:
 }
 ```
 
-| Element                    | Description |
+| 元素                    | 描述 |
 | -------------------------- | --- |
-| Enabled                    | Whether or not the server has any security enabled. |
-| Authentication:Audience    | Identifies the recipient that the token is intended for. This is set automatically by the `DevelopmentIdentityProvider`. |
-| Authentication:Authority   | The issuer of the jwt token. This is set automatically by the `DevelopmentIdentityProvider`. |
+| Enabled                    | 服务器是否启用了任何安全功能。 |
+| Authentication:Audience    | 标识令牌的目标接收者。这由 `DevelopmentIdentityProvider` 自动设置。 |
+| Authentication:Authority   | jwt 令牌的颁发者。这由 `DevelopmentIdentityProvider` 自动设置。 |
 
-## Authentication with Azure AD
+## 使用 Azure AD 进行身份验证
 
-### Create a Resource Application in Azure AD for your Medical Imaging Server for DICOM
+### 为 Medical Imaging Server for DICOM 在 Azure AD 中创建资源应用程序
 
-1. Sign into the [Azure Portal](https://ms.portal.azure.com/). Search for **App Services** and select your Medical Imaging Server for DICOM App Service. Copy the **URL** of your Dicom App Service.
-1. Select **Azure Active Directory** > **App Registrations** > **New registration**:
-    1. Enter a **Name** for your app registration.
-    2. In **Redirect URI**, select **Web** and enter the **URL** of your Medical Imaging Server for DICOM App Service.
-    3. Select **Register**.
-1. Select **Expose an API** > **Set**. You can specify a URI as the **URL** of your app service or use the generated App ID URI. Select **Save**.
-1. Select **Add a Scope**:
-    1. In **Scope name**, enter *user_impersonation*.
-    1. In the text boxes, add an admin consent display name and admin consent description you want users to see on the consent page. For example, *access my app*.
+1. 登录 [Azure 门户](https://ms.portal.azure.com/)。搜索 **App Services** 并选择您的 Medical Imaging Server for DICOM App Service。复制 Dicom App Service 的 **URL**。
+2. 选择 **Azure Active Directory** > **应用注册** > **新注册**：
+    1. 输入应用注册的**名称**。
+    2. 在**重定向 URI** 中，选择 **Web** 并输入 Medical Imaging Server for DICOM App Service 的 **URL**。
+    3. 选择**注册**。
+3. 选择**公开 API** > **设置**。您可以将 URI 指定为应用服务的 **URL** 或使用生成的 App ID URI。选择**保存**。
+4. 选择**添加范围**：
+    1. 在**范围名称**中，输入 *user_impersonation*。
+    2. 在文本框中，添加您希望用户在同意页面上看到的管理员同意显示名称和管理员同意描述。例如，*访问我的应用*。
 
-### Set the Authentication of your App Service
+### 设置 App Service 的身份验证
 
-1. Navigate to your Medical Imaging Server for DICOM App Service that you deployed to Azure.
-1. Select **Configuration** to update the **Audience**, **Authority**, and **Security:Enabled**:
-    1. Set the **Application ID URI** enabled above as the **Audience**.
-    1. **Authority** is whichever tenant your application exists in, for example: ```https://login.microsoftonline.com/<tenant-name>.onmicrosoft.com```.
-    1.  Set **Security:Enabled** to be ```True```.
-    1.  Save your changes to the configuration.
+1. 导航到您部署到 Azure 的 Medical Imaging Server for DICOM App Service。
+2. 选择**配置**以更新 **Audience**、**Authority** 和 **Security:Enabled**：
+    1. 将上面启用的**应用程序 ID URI** 设置为 **Audience**。
+    2. **Authority** 是应用程序所在的租户，例如：```https://login.microsoftonline.com/<tenant-name>.onmicrosoft.com```。
+    3.  将 **Security:Enabled** 设置为 ```True```。
+    4.  保存对配置的更改。
 
-### Create a Service Client Application
+### 创建服务客户端应用程序
 
-1. Select **Azure Active Directory** > **App Registrations** > **New registration**:
-    1. Enter a **Name** for your service client. You can provide a **URI** but it typically will not be used.
-    1. Select **Register**.
-1. Copy the **Application (client) ID** and the **Directory (tenant) ID** for later.
-1. Select **API Permissions** to provide your service client permission to your resource application:
-    1. Select **Add a permission**.
-    1. Under **My APIs**, select the resource application you created above for your Dicom App Service.
-    1. Under **Select Permissions**, select the application roles from the ones that you defined on the resource application.
-    1. Select **Add permissions**.
-1. Select **Certificates & secrets** to generate a secret for obtaining tokens:
-    1. Select **New client secret**.
-    1. Provide a **Description** and duration of the secret. Select **Add**.
-    1. Copy the secret once it has been created. It will only be displayed once in the portal.
+1. 选择 **Azure Active Directory** > **应用注册** > **新注册**：
+    1. 输入服务客户端的**名称**。您可以提供 **URI**，但通常不会使用。
+    2. 选择**注册**。
+2. 复制**应用程序（客户端）ID** 和**目录（租户）ID** 以供以后使用。
+3. 选择**API 权限**以为服务客户端提供对资源应用程序的权限：
+    1. 选择**添加权限**。
+    2. 在**我的 API** 下，选择您上面为 Dicom App Service 创建的资源应用程序。
+    3. 在**选择权限**下，从您在资源应用程序上定义的应用程序角色中选择应用程序角色。
+    4. 选择**添加权限**。
+4. 选择**证书和机密**以生成用于获取令牌的机密：
+    1. 选择**新建客户端机密**。
+    2. 提供机密的**描述**和持续时间。选择**添加**。
+    3. 创建后立即复制机密。它只会在门户中显示一次。
 
-### Get Access Token Using Azure CLI
+### 使用 Azure CLI 获取访问令牌
 
-1. First, update the application you create above to have access to the Azure CLI:
-    1. Select **Expose an API** > **Add a Client Application**.
-    1. For **Client ID**, provide the client ID of Azure CLI: **04b07795-8ddb-461a-bbee-02f9e1bf7b46**. *Note this is available at the [Azure CLI Github Repository](https://github.com/Azure/azure-cli/blob/24e0b9ef8716e16b9e38c9bb123a734a6cf550eb/src/azure-cli-core/azure/cli/core/_profile.py#L65)*.
-    1. Select your **Application ID URI** under **Authorized Scopes**.
-    1. Select **Add Application**.
-1. [Install Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest).
-1. Login to Azure: ```az account```
-1. Request access token using the **Application ID URI** set above: ```az account get-access-token --resource=<APP-ID-URI>```
+1. 首先，更新您上面创建的应用程序以访问 Azure CLI：
+    1. 选择**公开 API** > **添加客户端应用程序**。
+    2. 对于**客户端 ID**，提供 Azure CLI 的客户端 ID：**04b07795-8ddb-461a-bbee-02f9e1bf7b46**。*注意：这在 [Azure CLI Github 存储库](https://github.com/Azure/azure-cli/blob/24e0b9ef8716e16b9e38c9bb123a734a6cf550eb/src/azure-cli-core/azure/cli/core/_profile.py#L65) 中可用*。
+    3. 在**授权范围**下选择您的**应用程序 ID URI**。
+    4. 选择**添加应用程序**。
+2. [安装 Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)。
+3. 登录 Azure：```az account```
+4. 使用上面设置的**应用程序 ID URI** 请求访问令牌：```az account get-access-token --resource=<APP-ID-URI>```
 
-### Get Access Token Using Postman
+### 使用 Postman 获取访问令牌
 
-1. [Install Postman](https://www.postman.com/downloads/) or use the [Postman Web App](https://web.postman.co/).
-1. Create a new **Post** Request with the following form-data:
-    1. URL: ```<Authority>/<tenant-ID>/oauth2/token``` where **Authority** is the tenant your application exists in, configured above, and **Tenant ID** is from your Azure App Registration.
-        1. If using Azure Active Directory V2 then instead use URL: ```<Authority>/<tenant-ID>/oauth2/v2.0/token```.
-    1. *client_id*: the **Client ID** for your Service Client.
-    1. *grant_type*: "client_credentials"
-    1. *client_secret*: the **Client secret** for your Service Client.
-    1. *resource*: the **Application ID URI** for your Resource Application.
-        1. If using Azure Active Directory V2 then instead of setting *resource*, set *scope*: ```<Application ID URI>/.default``` where Application ID URI is for your Resource Application.
-1. Select **Send** to retrieve the access token.
+1. [安装 Postman](https://www.postman.com/downloads/) 或使用 [Postman Web 应用](https://web.postman.co/)。
+2. 创建新的 **Post** 请求，使用以下表单数据：
+    1. URL：```<Authority>/<tenant-ID>/oauth2/token```，其中 **Authority** 是您的应用程序所在的租户，在上面配置，**Tenant ID** 来自您的 Azure 应用注册。
+        1. 如果使用 Azure Active Directory V2，则改用 URL：```<Authority>/<tenant-ID>/oauth2/v2.0/token```。
+    2. *client_id*：服务客户端的**客户端 ID**。
+    3. *grant_type*："client_credentials"
+    4. *client_secret*：服务客户端的**客户端机密**。
+    5. *resource*：资源应用程序的**应用程序 ID URI**。
+        1. 如果使用 Azure Active Directory V2，则不要设置 *resource*，而是设置 *scope*：```<Application ID URI>/.default```，其中 Application ID URI 是您的资源应用程序的。
+3. 选择**发送**以检索访问令牌。
 
-## Summary
+## 总结
 
-In this How-to Guide, you learned how to configure the authentication settings for the Medical Imaging Server for DICOM through Azure. To learn how to manage authentication in development and test scenarios, see [Using Identity Server for Development](../development/identity-server-authentication.md).
+在本操作指南中，您学习了如何通过 Azure 配置 Medical Imaging Server for DICOM 的身份验证设置。要了解如何在开发和测试场景中管理身份验证，请参阅[使用 Identity Server 进行开发](../development/identity-server-authentication.md)。

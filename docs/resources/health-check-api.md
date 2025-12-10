@@ -1,37 +1,37 @@
-# Health Check API
+# 健康检查 API
 
-The Health Check API allows user to check the health of the Medical Imaging Server for DICOM and all the underlying services.
+健康检查 API 允许用户检查 Medical Imaging Server for DICOM 和所有基础服务的健康状态。
 
-## API Design
+## API 设计
 
-The Health Check API exposes a GET endpoint and responds with JSON content.
+健康检查 API 公开一个 GET 端点并以 JSON 内容响应。
 
-Verb | Route              | Returns     
+动词 | 路由              | 返回     
 :--- | :----------------- | :---------- 
 GET  | /health/check      | Json Object 
 
-## Object Model
+## 对象模型
 
-The GET request returns a JSON object with the following fields:
+GET 请求返回一个具有以下字段的 JSON 对象：
 
-Field         | Type   | Description
+字段         | 类型   | 描述
 :------------ | :----- | :----------
-overallStatus | string | Status `Healthy` or `Unhealthy`
-details       | array  | Array of objects with details on underlying services
+overallStatus | string | 状态 `Healthy` 或 `Unhealthy`
+details       | array  | 包含基础服务详细信息的对象数组
 
-Objects of the `details` array have the following model:
+`details` 数组的对象具有以下模型：
 
-Field         | Type   | Description
+字段         | 类型   | 描述
 :------------ | :----- | :----------
-name		  | string | Name of the service
-status		  | string | Status `Healthy` or `Unhealthy`
-description   | string | Description of the status
+name		  | string | 服务名称
+status		  | string | 状态 `Healthy` 或 `Unhealthy`
+description   | string | 状态描述
 
-## Get Health Status
+## 获取健康状态
 
-Internally, the Microsoft.Extensions.Diagnostics.HealthChecks NuGet package is used for getting the health status. Its documentation can be found [here](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.diagnostics.healthchecks?view=dotnet-plat-ext-3.1).
+在内部，使用 Microsoft.Extensions.Diagnostics.HealthChecks NuGet 包来获取健康状态。其文档可以在[这里](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.diagnostics.healthchecks?view=dotnet-plat-ext-3.1)找到。
 
-To check the health status of Medical Imaging Server for DICOM, the user issues a GET request to /health/check. Following is a sample JSON response if all the underlying services are healthy:
+要检查 Medical Imaging Server for DICOM 的健康状态，用户向 /health/check 发出 GET 请求。以下是如果所有基础服务都健康，示例 JSON 响应：
 ```
 {
 	"overallStatus":"Healthy",
@@ -56,9 +56,9 @@ To check the health status of Medical Imaging Server for DICOM, the user issues 
 }
 ```
 
-Healthy (HTTP Status Code 200) is returned as the overall status if all the underlying services are healthy. If any of the underlying services are unhealthy, overall status of the Medical Imaging Server for DICOM will be returned as unhealthy (HTTP Status Code 503).
+如果所有基础服务都健康，则返回 Healthy（HTTP 状态代码 200）作为总体状态。如果任何基础服务不健康，Medical Imaging Server for DICOM 的总体状态将返回为不健康（HTTP 状态代码 503）。
 
-Following is an example JSON if SQL Server service is unhealthy:
+以下是 SQL Server 服务不健康时的示例 JSON：
 ```
 {
 	"overallStatus":"Unhealthy",
@@ -83,5 +83,4 @@ Following is an example JSON if SQL Server service is unhealthy:
 }
 ```
 
-Details array in the response contains details of all the services and their health status.
-
+响应中的详细信息数组包含所有服务及其健康状态的详细信息。

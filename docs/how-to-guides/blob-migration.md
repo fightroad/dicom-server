@@ -1,16 +1,17 @@
-# Blob Migration
+# Blob 迁移
 
-> This documentation is only relevant to the Medical Imaging Server for DICOM open-source project. All data in Azure Health Data Services Dicom Services has already been migrated.
+> 本文档仅与 Medical Imaging Server for DICOM 开源项目相关。Azure Health Data Services Dicom Services 中的所有数据已经迁移。
 
-Currently DICOM files are stored with DICOM UIDs as blob names in blob storage, using the template `{account}/{container}/{studyUid}/{seriesUid}/{sopInstanceUid}_{watermark}.dcm`.
-You can see this naming scheme in your blob container if you've saved any files. Here's an example using the blue circle sample image:
+目前 DICOM 文件以 DICOM UID 作为 blob 名称存储在 blob 存储中，使用模板 `{account}/{container}/{studyUid}/{seriesUid}/{sopInstanceUid}_{watermark}.dcm`。
+如果您保存了任何文件，可以在 blob 容器中看到此命名方案。以下是使用蓝色圆圈示例图像的示例：
 
 ![dicomwebcontainer-bluecircle-old-blob-format](../images/dicomwebcontainer-bluecircle-old-blob-format.png)
 
-Since UIDs may include personal information about the context of their creation, such as patient information or identifiers, we made the decision to change the way that we store DICOM files. In the next sections we list the steps to migrate your existing blobs from the old format to the new format.
+由于 UID 可能包含有关其创建上下文个人信息，例如患者信息或标识符，我们决定更改存储 DICOM 文件的方式。在以下部分中，我们列出了将现有 blob 从旧格式迁移到新格式的步骤。
 
-## Blob Migration Configuration
-Below is the `appsettings.json` configuration related to blob migration. Several properties need to be updated to trigger migration.
+## Blob 迁移配置
+
+下面是与 blob 迁移相关的 `appsettings.json` 配置。需要更新几个属性以触发迁移。
 
 ```json
 "DicomServer": {
@@ -28,48 +29,47 @@ Below is the `appsettings.json` configuration related to blob migration. Several
 }
 ```
 
-These settings can be adjusted as part of the Azure App Service's configuration settings if you used the [deploy to Azure option](https://github.com/microsoft/dicom-server#deploy-to-azure) from our README:
+如果您使用了 README 中的[部署到 Azure 选项](https://github.com/microsoft/dicom-server#deploy-to-azure)，这些设置可以作为 Azure App Service 配置设置的一部分进行调整：
 
 ![app-service-settings-configuration](../images/app-service-settings-configuration.png)
 
 
-## Migration Steps
+## 迁移步骤
 
-### If deployed new service and have not created any files yet
-1. [You can upgrade to the latest version of the service](../resources/dicom-server-maintaince-guide.md) and skip the migration steps. The configuration section `Blob Migration` will not be present when service is on the latest version.
+### 如果部署了新服务且尚未创建任何文件
+1. [您可以升级到最新版本的服务](../resources/dicom-server-maintaince-guide.md) 并跳过迁移步骤。当服务处于最新版本时，配置部分 `Blob Migration` 将不存在。
 
-### If you have already uploaded DICOM files but do not care about migrating the data
-1. If you have already uploaded DICOM files but do not care about migrating the data, you can use the [Delete API](../resources/conformance-statement.md#delete) to delete all existing studies.
-2. [You can upgrade to the latest version of the service](../resources/dicom-server-maintaince-guide.md) and skip the migration steps. The configuration section `Blob Migration` will not be present when service is on the latest version.
+### 如果您已经上传了 DICOM 文件但不关心迁移数据
+1. 如果您已经上传了 DICOM 文件但不关心迁移数据，可以使用 [Delete API](../resources/conformance-statement.md#delete) 删除所有现有研究。
+2. [您可以升级到最新版本的服务](../resources/dicom-server-maintaince-guide.md) 并跳过迁移步骤。当服务处于最新版本时，配置部分 `Blob Migration` 将不存在。
 
-### If you have already uploaded DICOM files and want to migrate the data
-If you have already uploaded DICOM files and want to migrate the data, you will need to execute the following steps before upgrading. This scenario has two options depending on whether if you want interruption to the service or not. Make sure Azure Monitor is configured to monitor the service before starting the migration (for more info on how to configure Azure monitor, please refer to [the Azure Monitor guide](../how-to-guides/configure-dicom-server-settings.md#azure-monitor)).
+### 如果您已经上传了 DICOM 文件并希望迁移数据
+如果您已经上传了 DICOM 文件并希望迁移数据，您需要在升级之前执行以下步骤。此场景有两个选项，取决于您是否希望服务中断。在开始迁移之前，请确保配置了 Azure Monitor 以监控服务（有关如何配置 Azure monitor 的更多信息，请参考 [Azure Monitor 指南](../how-to-guides/configure-dicom-server-settings.md#azure-monitor)）。
 
-#### With Service Interruption
-If you are ok with interruption to the service, you can follow the steps below. The interruption here is a self-managed one and using the service while the copying is occuring and before switching to the new format can corrupt the data path or retrieve wrong data.
+#### 服务中断
+如果您可以接受服务中断，可以按照以下步骤操作。这里的中断是自我管理的，在复制过程中以及切换到新格式之前使用服务可能会损坏数据路径或检索错误数据。
 
-1. Set `BlobMigration.StartCopy` to `true` and restart the service.
-   1. When restarting the service, ensure it is in such a way that it picks up the new application settings and this will vary by how your service is deployed.
-   2. This will trigger the `CopyFiles` Durable Function which will copy the old format DICOM files to the new format.
-   3**Do not use the service at this time**. We want to make sure all files are copied over.
-2. To ensure the Copy operation has been completed, you can check Azure Monitor logs for a `"Completed copying files."` message. This will indicate that the operation has been completed:
+1. 将 `BlobMigration.StartCopy` 设置为 `true` 并重启服务。
+   1. 重启服务时，确保它以能够获取新应用程序设置的方式进行，这将根据服务的部署方式而有所不同。
+   2. 这将触发 `CopyFiles` Durable Function，它将旧格式的 DICOM 文件复制到新格式。
+   3. **此时不要使用服务**。我们希望确保所有文件都已复制。
+2. 为确保复制操作已完成，您可以检查 Azure Monitor 日志中的 `"Completed copying files."` 消息。这将指示操作已完成：
 
    ![dicomwebcontainer-bluecircle-copy-logs](../images/dicomwebcontainer-bluecircle-copy-logs.png)
 
-    At this time, you'll have both the new and old files:
+    此时，您将同时拥有新旧文件：
 
     ![dicomwebcontainer-bluecircle-old-blob-format-dual](../images/dicomwebcontainer-bluecircle-old-blob-format-dual.png)
 
-3. Once the copy is completed, you can change `BlobMigration.FormatType` to `"New"` and `BlobMigration.StartDelete` to `true` and restart the service.
-   1. This will trigger a Durable Function which will delete all the old format blobs only if corresponding new format blobs exist. This is a safe operation and doesn't delete any blobs without checking for the existence of new format blobs.
-   2. **Start using your service** to store and retrieve data, which will work with the `New` format.
-4. To ensure Delete has been completed, you can check Azure Monitor logs for `"Completed deleting files."` message. This will indicate that the delete has been completed.
+3. 复制完成后，您可以将 `BlobMigration.FormatType` 更改为 `"New"`，将 `BlobMigration.StartDelete` 设置为 `true` 并重启服务。
+   1. 这将触发一个 Durable Function，它将删除所有旧格式的 blob，但前提是存在相应的新格式 blob。这是一个安全操作，不会在不检查新格式 blob 是否存在的情况下删除任何 blob。
+   2. **开始使用您的服务**存储和检索数据，这将与 `New` 格式一起工作。
+4. 为确保删除已完成，您可以检查 Azure Monitor 日志中的 `"Completed deleting files."` 消息。这将指示删除已完成。
 
-#### Without Service Interruption
-If you are not ok with interruption to the service, you can follow the steps below.
+#### 无服务中断
+如果您不能接受服务中断，可以按照以下步骤操作。
 
-1. Change `BlobMigration.FormatType` to `"Dual"`. This will duplicate any new DICOM files uploaded to both old and new format as you continue to use your service during the copying operation.
-2. Follow steps in [With Service Interruption](#with-service-interruption), but feel free to continue using the service.
+1. 将 `BlobMigration.FormatType` 更改为 `"Dual"`。这将复制任何新上传的 DICOM 文件到旧格式和新格式，因为您在复制操作期间继续使用服务。
+2. 按照[服务中断](#服务中断)中的步骤操作，但可以继续使用服务。
 
-> **Please post any questions or issues encountered during migration in the related [GitHub Discussion](https://github.com/microsoft/dicom-server/discussions/1561).**
-
+> **请在相关的 [GitHub Discussion](https://github.com/microsoft/dicom-server/discussions/1561) 中发布迁移过程中遇到的任何问题或问题。**

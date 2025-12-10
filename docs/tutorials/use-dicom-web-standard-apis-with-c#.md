@@ -1,36 +1,36 @@
-# Use DICOMweb&trade; Standard APIs with C#
+# 使用 C# 的 DICOMweb&trade; 标准 API
 
-This tutorial uses C# to demonstrate working with the Medical Imaging Server for DICOM.
+本教程使用 C# 演示如何使用 Medical Imaging Server for DICOM。
 
-For the tutorial we will use the DICOM files here: [Sample DICOM files](../dcms). The file name, studyUID, seriesUID and instanceUID of the sample DICOM files is as follows:
+在本教程中，我们将使用这里的 DICOM 文件：[示例 DICOM 文件](../dcms)。示例 DICOM 文件的文件名、studyUID、seriesUID 和 instanceUID 如下：
 
-| File | StudyUID | SeriesUID | InstanceUID |
+| 文件 | StudyUID | SeriesUID | InstanceUID |
 | --- | --- | --- | ---|
 |green-square.dcm|1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420|1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652|1.2.826.0.1.3680043.8.498.12714725698140337137334606354172323212|
 |red-triangle.dcm|1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420|1.2.826.0.1.3680043.8.498.45787841905473114233124723359129632652|1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395|
 |blue-circle.dcm|1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420|1.2.826.0.1.3680043.8.498.77033797676425927098669402985243398207|1.2.826.0.1.3680043.8.498.13273713909719068980354078852867170114|
 
-> NOTE: Each of these files represent a single instance and are part of the same study. Also green-square and red-triangle are part of the same series, while blue-circle is in a separate series.
+> 注意：这些文件中的每一个都代表一个实例，并且是同一研究的一部分。此外，green-square 和 red-triangle 是同一序列的一部分，而 blue-circle 在单独的序列中。
 
-## Prerequisites
+## 先决条件
 
-In order to use the DICOMWeb&trade; Standard APIs, you must have an instance of the Medical Imaging Server for DICOM deployed. If you have not already deployed the Medical Imaging Server, [Deploy the Medical Imaging Server to Azure](../quickstarts/deploy-via-azure.md).
+为了使用 DICOMWeb&trade; 标准 API，您必须部署 Medical Imaging Server for DICOM 的实例。如果您尚未部署 Medical Imaging Server，请[将 Medical Imaging Server 部署到 Azure](../quickstarts/deploy-via-azure.md)。
 
-Once you have deployed an instance of the Medical Imaging Server for DICOM, retrieve the URL for your App Service:
+部署 Medical Imaging Server for DICOM 实例后，检索 App Service 的 URL：
 
-1. Sign into the [Azure Portal](https://portal.azure.com/).
-1. Search for **App Services** and select your Medical Imaging Server for DICOM App Service.
-1. Copy the **URL** of your App Service.
-1. Note the version of the REST API you would like to use. When creating the `DicomWebClient` below, we recommend to pass the version in to pin the client to a specific version. For more information on versioning visit the [Api Versioning Documentation](../api-versioning.md).
+1. 登录 [Azure 门户](https://portal.azure.com/)。
+2. 搜索 **App Services** 并选择您的 Medical Imaging Server for DICOM App Service。
+3. 复制 App Service 的 **URL**。
+4. 注意您要使用的 REST API 版本。在下面创建 `DicomWebClient` 时，我们建议传入版本以将客户端固定到特定版本。有关版本控制的更多信息，请访问 [API 版本控制文档](../api-versioning.md)。
 
-In your application install the following nuget packages:
+在您的应用程序中安装以下 nuget 包：
 
 1.  [Dicom Client](https://microsofthealthoss.visualstudio.com/FhirServer/_packaging?_a=package&feed=Public&package=Microsoft.Health.Dicom.Client&protocolType=NuGet)
 2.  [fo-dicom](https://www.nuget.org/packages/fo-dicom/)
 
-## Create a `DicomWebClient`
+## 创建 `DicomWebClient`
 
-After you have deployed your Medical Imaging Server for DICOM, you will create a 'DicomWebClient'. Run the following code snippet to create `DicomWebClient` which we will be using for the rest of the tutorial. Ensure you have both nuget packages mentioned above installed.
+部署 Medical Imaging Server for DICOM 后，您将创建一个 'DicomWebClient'。运行以下代码片段以创建 `DicomWebClient`，我们将在本教程的其余部分使用它。确保您已安装上面提到的两个 nuget 包。
 
 ```c#
 string webServerUrl ="{Your DicomWeb Server URL}"
@@ -39,17 +39,17 @@ httpClient.BaseAddress = new Uri(webServerUrl);
 IDicomWebClient client = new DicomWebClient(httpClient, "v<version>");
 ```
 
-With the `DicomWebClient` we can now perform Store, Retrieve, Search, and Delete operations.
+使用 `DicomWebClient`，我们现在可以执行 Store、Retrieve、Search 和 Delete 操作。
 
-## Store DICOM Instances (STOW)
+## 存储 DICOM 实例 (STOW)
 
-Using the `DicomWebClient` that we have created, we can now store DICOM files.
+使用我们创建的 `DicomWebClient`，我们现在可以存储 DICOM 文件。
 
-### Store single instance
+### 存储单个实例
 
-This demonstrates how to upload a single DICOM file.
+这演示了如何上传单个 DICOM 文件。
 
-_Details:_
+_详细信息：_
 
 * POST /studies
 
@@ -58,11 +58,11 @@ DicomFile dicomFile = await DicomFile.OpenAsync(@"{Path To blue-circle.dcm}");
 DicomWebResponse response = await client.StoreAsync(new[] { dicomFile });
 ```
 
-### Store instances for a specific study
+### 为特定研究存储实例
 
-This  demonstrates how to upload a DICOM file into a specified study.
+这演示了如何将 DICOM 文件上传到指定的研究。
 
-_Details:_
+_详细信息：_
 
 * POST /studies/{study}
 
@@ -71,13 +71,13 @@ DicomFile dicomFile = await DicomFile.OpenAsync(@"{Path To red-triangle.dcm}");
 DicomWebResponse response = await client.StoreAsync(new[] { dicomFile }, "1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420");
 ```
 
-Before moving on to the next part also upload the green-square.dcm file using either of the methods above.
+在继续下一部分之前，也使用上述任一方法上传 green-square.dcm 文件。
 
-## Retrieving DICOM instance(s) (WADO)
+## 检索 DICOM 实例 (WADO)
 
-The following code snippets will demonstrate how to perform each of the retrieve queries using the `DicomWebClient` created earlier.
+以下代码片段将演示如何使用之前创建的 `DicomWebClient` 执行每个检索查询。
 
-The following variables will be used throghout the rest of the examples:
+以下变量将在其余示例中使用：
 
 ```c#
 string studyInstanceUid = "1.2.826.0.1.3680043.8.498.13230779778012324449356534479549187420"; //StudyInstanceUID for all 3 examples
@@ -85,11 +85,11 @@ string seriesInstanceUid = "1.2.826.0.1.3680043.8.498.45787841905473114233124723
 string sopInstanceUid = "1.2.826.0.1.3680043.8.498.47359123102728459884412887463296905395"; //SOPInstanceUID for red-triangle
 ```
 
-### Retrieve all instances within a study
+### 检索研究中的所有实例
 
-This retrieves all instances within a single study.
+这检索单个研究中的所有实例。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}
 
@@ -97,11 +97,11 @@ _Details:_
 DicomWebResponse response = await client.RetrieveStudyAsync(studyInstanceUid);
 ```
 
-All three of the dcm files that we uploaded previously are part of the same study so the response should return all 3 instances. Validate that the response has a status code of OK and that all three instances are returned.
+我们之前上传的所有三个 dcm 文件都是同一研究的一部分，因此响应应该返回所有 3 个实例。验证响应具有 OK 状态代码并且返回了所有三个实例。
 
-### Use the retrieved instances
+### 使用检索到的实例
 
-The following code snippet shows how to access the instances that are retrieved, how to access some of the fields of the instances, and how to save it as a .dcm file.
+以下代码片段显示了如何访问检索到的实例，如何访问实例的一些字段，以及如何将其保存为 .dcm 文件。
 
 ```c#
 DicomWebAsyncEnumerableResponse<DicomFile> response = await client.RetrieveStudyAsync(studyInstanceUid);
@@ -116,11 +116,11 @@ await foreach (DicomFile file in response)
 }
 ```
 
-### Retrieve metadata of all instances in study
+### 检索研究中所有实例的元数据
 
-This request retrieves the metadata for all instances within a single study.
+此请求检索单个研究中所有实例的元数据。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/metadata
 
@@ -128,13 +128,13 @@ _Details:_
 DicomWebResponse response = await client.RetrieveStudyMetadataAsync(studyInstanceUid);
 ```
 
-All three of the dcm files that we uploaded previously are part of the same study so the response should return the metadata for all 3 instances. Validate that the response has a status code of OK and that all the metadata is returned.
+我们之前上传的所有三个 dcm 文件都是同一研究的一部分，因此响应应该返回所有 3 个实例的元数据。验证响应具有 OK 状态代码并且返回了所有元数据。
 
-### Retrieve all instances within a series
+### 检索序列中的所有实例
 
-This request retrieves all instances within a single series.
+此请求检索单个序列中的所有实例。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/series/{series}
 
@@ -142,13 +142,13 @@ _Details:_
 DicomWebResponse response = await client.RetrieveSeriesAsync(studyInstanceUid, seriesInstanceUid);
 ```
 
-This series has 2 instances (green-square and red-triangle), so the response should return both instances. Validate that the response has a status code of OK and that both instances are returned.
+此序列有 2 个实例（green-square 和 red-triangle），因此响应应该返回两个实例。验证响应具有 OK 状态代码并且返回了两个实例。
 
-### Retrieve metadata of all instances within a series
+### 检索序列中所有实例的元数据
 
-This request retrieves the metadata for all instances within a single study.
+此请求检索单个研究中所有实例的元数据。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/series/{series}/metadata
 
@@ -156,13 +156,13 @@ _Details:_
 DicomWebResponse response = await client.RetrieveSeriesMetadataAsync(studyInstanceUid, seriesInstanceUid);
 ```
 
-This series has 2 instances (green-square and red-triangle), so the response should return metatdata for both instances. Validate that the response has a status code of OK and that both instances metadata are returned.
+此序列有 2 个实例（green-square 和 red-triangle），因此响应应该返回两个实例的元数据。验证响应具有 OK 状态代码并且返回了两个实例的元数据。
 
-### Retrieve a single instance within a series of a study
+### 检索研究的序列中的单个实例
 
-This request retrieves a single instances.
+此请求检索单个实例。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/series{series}/instances/{instance}
 
@@ -170,13 +170,13 @@ _Details:_
 DicomWebResponse response = await client.RetrieveInstanceAsync(studyInstanceUid, seriesInstanceUid, sopInstanceUid);
 ```
 
-This should only return the instance red-triangle. Validate that the response has a status code of OK and that the instance is returned.
+这应该只返回实例 red-triangle。验证响应具有 OK 状态代码并且返回了实例。
 
-### Retrieve metadata of a single instance within a series of a study
+### 检索研究的序列中的单个实例的元数据
 
-This request retrieves the metadata for a single instances within a single study and series.
+此请求检索单个研究和序列中的单个实例的元数据。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/series/{series}/instances/{instance}/metadata
 
@@ -184,13 +184,13 @@ _Details:_
 DicomWebResponse response = await client.RetrieveInstanceMetadataAsync(studyInstanceUid, seriesInstanceUid, sopInstanceUid);
 ```
 
-This should only return the metatdata for the instance red-triangle. Validate that the response has a status code of OK and that the metadata is returned.
+这应该只返回实例 red-triangle 的元数据。验证响应具有 OK 状态代码并且返回了元数据。
 
-### Retrieve one or more frames from a single instance
+### 从单个实例检索一个或多个帧
 
-This request retrieves one or more frames from a single instance.
+此请求从单个实例检索一个或多个帧。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/series/{series}/instances/{instance}/frames/{frames}
 
@@ -199,17 +199,17 @@ DicomWebResponse response = await client.RetrieveFramesAsync(studyInstanceUid, s
 
 ```
 
-This should return the only frame from the red-triangle. Validate that the response has a status code of OK and that the frame is returned.
+这应该只返回 red-triangle 的唯一帧。验证响应具有 OK 状态代码并且返回了帧。
 
-## Query DICOM (QIDO)
+## 查询 DICOM (QIDO)
 
-> NOTE: Please see the [Conformance Statement](../resources/conformance-statement.md#supported-search-parameters) file for supported DICOM attributes.
+> 注意：请参阅[符合性声明](../resources/conformance-statement.md#supported-search-parameters)文件以了解支持的 DICOM 属性。
 
-### Search for studies
+### 搜索研究
 
-This request searches for one or more studies by DICOM attributes.
+此请求按 DICOM 属性搜索一个或多个研究。
 
-_Details:_
+_详细信息：_
 
 * GET /studies?StudyInstanceUID={study}
 
@@ -218,13 +218,13 @@ string query = $"/studies?StudyInstanceUID={studyInstanceUid}";
 DicomWebResponse response = await client.QueryAsync(query);
 ```
 
-Validate that response includes 1 study and that response code is OK.
+验证响应包括 1 个研究并且响应代码为 OK。
 
-### Search for series
+### 搜索序列
 
-This request searches for one or more series by DICOM attributes.
+此请求按 DICOM 属性搜索一个或多个序列。
 
-_Details:_
+_详细信息：_
 
 * GET /series?SeriesInstanceUID={series}
 
@@ -233,13 +233,13 @@ string query = $"/series?SeriesInstanceUID={seriesInstanceUid}";
 DicomWebResponse response = await client.QueryAsync(query);
 ```
 
-Validate that response includes 1 series and that response code is OK.
+验证响应包括 1 个序列并且响应代码为 OK。
 
-### Search for series within a study
+### 在研究内搜索序列
 
-This request searches for one or more series within a single study by DICOM attributes.
+此请求按 DICOM 属性在单个研究内搜索一个或多个序列。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/series?SeriesInstanceUID={series}
 
@@ -248,13 +248,13 @@ string query = $"/studies/{studyInstanceUid}/series?SeriesInstanceUID={seriesIns
 DicomWebResponse response = await client.QueryAsync(query);
 ```
 
-Validate that response includes 1 series and that response code is OK.
+验证响应包括 1 个序列并且响应代码为 OK。
 
-### Search for instances
+### 搜索实例
 
-This request searches for one or more instances by DICOM attributes.
+此请求按 DICOM 属性搜索一个或多个实例。
 
-_Details:_
+_详细信息：_
 
 * GET /instances?SOPInstanceUID={instance}
 
@@ -263,13 +263,13 @@ string query = $"/instances?SOPInstanceUID={sopInstanceUid}";
 DicomWebResponse response = await client.QueryAsync(query);
 ```
 
-Validate that response includes 1 instance and that response code is OK.
+验证响应包括 1 个实例并且响应代码为 OK。
 
-### Search for instances within a study
+### 在研究内搜索实例
 
-This request searches for one or more instances within a single study by DICOM attributes.
+此请求按 DICOM 属性在单个研究内搜索一个或多个实例。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/instances?SOPInstanceUID={instance}
 
@@ -278,13 +278,13 @@ string query = $"/studies/{studyInstanceUid}/instances?SOPInstanceUID={sopInstan
 DicomWebResponse response = await client.QueryAsync(query);
 ```
 
-Validate that response includes 1 instance and that response code is OK.
+验证响应包括 1 个实例并且响应代码为 OK。
 
-### Search for instances within a study and series
+### 在研究和序列内搜索实例
 
-This request searches for one or more instances within a single study and single series by DICOM attributes.
+此请求按 DICOM 属性在单个研究和单个序列内搜索一个或多个实例。
 
-_Details:_
+_详细信息：_
 
 * GET /studies/{study}/series/{series}instances?SOPInstanceUID={instance}
 
@@ -293,17 +293,17 @@ string query = $"/studies/{studyInstanceUid}/series/{seriesInstanceUid}/instance
 DicomWebResponse response = await client.QueryAsync(query);
 ```
 
-Validate that response includes 1 instance and that response code is OK.
+验证响应包括 1 个实例并且响应代码为 OK。
 
-## Delete DICOM
+## 删除 DICOM
 
-> NOTE: Delete is not part of the DICOM standard, but has been added for convenience.
+> 注意：删除不是 DICOM 标准的一部分，但已添加以便于使用。
 
-### Delete a specific instance within a study and series
+### 删除研究和序列中的特定实例
 
-This request deletes a single instance within a single study and single series.
+此请求删除单个研究和单个序列中的单个实例。
 
-_Details:_
+_详细信息：_
 
 * DELETE /studies/{study}/series/{series}/instances/{instance}
 
@@ -312,13 +312,13 @@ string sopInstanceUidRed = "1.2.826.0.1.3680043.8.498.47359123102728459884412887
 DicomWebResponse response = await client.DeleteInstanceAsync(studyInstanceUid, seriesInstanceUid, sopInstanceUidRed);
 ```
 
-This deletes the red-triangle instance from the server. If it is successful the response status code contains no content.
+这从服务器删除 red-triangle 实例。如果成功，响应状态代码不包含内容。
 
-### Delete a specific series within a study
+### 删除研究中的特定序列
 
-This request deletes a single series (and all child instances) within a single study.
+此请求删除单个研究中的单个序列（以及所有子实例）。
 
-_Details:_
+_详细信息：_
 
 * DELETE /studies/{study}/series/{series}
 
@@ -326,13 +326,13 @@ _Details:_
 DicomWebResponse response = await client.DeleteSeriesAsync(studyInstanceUid, seriesInstanceUid);
 ```
 
-This deletes the green-square instance (it is the only element left in the series) from the server. If it is successful the response status code contains no content.
+这从服务器删除 green-square 实例（它是序列中唯一剩余的元素）。如果成功，响应状态代码不包含内容。
 
-### Delete a specific study
+### 删除特定研究
 
-This request deletes a single study (and all child series and instances).
+此请求删除单个研究（以及所有子序列和实例）。
 
-_Details:_
+_详细信息：_
 
 * DELETE /studies/{study}
 
@@ -340,4 +340,4 @@ _Details:_
 DicomWebResponse response = await client.DeleteStudyAsync(studyInstanceUid);
 ```
 
-This deletes the blue-circle instance (it is the only element left in the series) from the server. If it is successful the response status code contains no content.
+这从服务器删除 blue-circle 实例（它是序列中唯一剩余的元素）。如果成功，响应状态代码不包含内容。

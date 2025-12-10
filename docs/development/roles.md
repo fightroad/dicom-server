@@ -1,20 +1,20 @@
-# Roles in Microsoft Imaging Server for DICOM
+# Microsoft Imaging Server for DICOM 中的角色
 
-The medical imaging server uses a role-based access control system. The access control model is based on the following concepts:
+医学影像服务器使用基于角色的访问控制系统。访问控制模型基于以下概念：
 
-- **Data Actions** refer to specific allowed or disallowed operations that can be performed on a imaging server's data. Examples include `read`, `write`, and `delete`.
-- **Role definitions** or simply **roles**, are named collections of actions that are allowed be performed. They apply to a set of **scopes**.
-- **Scopes** define the subset of data to which a role definition applies. Currently, only the root scope (`/`) is supported, which means that role definitions apply to all the data in the imaging server.
-- **Role assignments** grants a role definition to an identity (user, group, or service principal).
+- **数据操作**是指可以在影像服务器数据上执行的特定允许或禁止的操作。示例包括 `read`、`write` 和 `delete`。
+- **角色定义**或简称为**角色**，是允许执行的操作的命名集合。它们适用于一组**范围**。
+- **范围**定义角色定义适用的数据子集。目前，仅支持根范围 (`/`)，这意味着角色定义适用于影像服务器中的所有数据。
+- **角色分配**将角色定义授予身份（用户、组或服务主体）。
 
-The set of data actions that can be part of a role definition are:
+可以作为角色定义一部分的数据操作集是：
 
-- `*` allows all data actions
-- `read` is required for reading and searching resources.
-- `write`is required for creating or updating resources.
-- `delete` is required for deleting resources.
+- `*` 允许所有数据操作
+- `read` 是读取和搜索资源所必需的。
+- `write` 是创建或更新资源所必需的。
+- `delete` 是删除资源所必需的。
 
-Roles are defined in the [roles.json](../../src/Microsoft.Health.Dicom.Web/roles.json) file. Administrators can customize them if desired. A role definition looks like this:
+角色在 [roles.json](../../src/Microsoft.Health.Dicom.Web/roles.json) 文件中定义。管理员可以根据需要自定义它们。角色定义如下所示：
 
 ``` json
 {
@@ -31,6 +31,6 @@ Roles are defined in the [roles.json](../../src/Microsoft.Health.Dicom.Web/roles
 }
 ```
 
-This role allows all data actions except `delete`. Note that if a user is part of this role and another role that allows `delete`, they will be allowed to perform the action.
+此角色允许除 `delete` 之外的所有数据操作。请注意，如果用户属于此角色和另一个允许 `delete` 的角色，则允许他们执行该操作。
 
-Role assignments are done in the identity provider. In Azure Active Directory, you define app roles on the imaging server's app registration. The app role names must correspond to the names of the roles defined in `roles.json`. Then you assign identities (users, groups, or service principals) to the app roles.
+角色分配在身份提供者中完成。在 Azure Active Directory 中，您在影像服务器的应用注册上定义应用角色。应用角色名称必须对应于 `roles.json` 中定义的角色名称。然后，您将身份（用户、组或服务主体）分配给应用角色。
